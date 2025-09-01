@@ -1,0 +1,18 @@
+# Arquivos sensíveis
+.env
+
+# Ambiente virtual
+venv/
+
+# Arquivos de cache do Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Configurações locais do VS Code/Python
+.Python
+
+# Arquivos gerados por pacotes Python
+*.egg-info/
+*.pdf
