@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -99,30 +99,33 @@
             width: 18px;
             height: 18px;
         }
+
+        /* Fundo claro/escuro */
         body {
-            background-color: #f3f4f6; /* Light mode background */
+            background-color: #f3f4f6; /* Claro */
             color: #1f2937;
             transition: background-color 0.3s ease, color 0.3s ease;
         }
-        .dark body {
-            background-color: #111827; /* Dark mode background */
+        body.dark {
+            background-color: #111827; /* Escuro */
             color: #f9fafb;
         }
-        .dark .bg-white {
+        body.dark .bg-white {
             background-color: #374151;
         }
-        .dark .bg-gray-50 {
+        body.dark .bg-gray-50 {
             background-color: #4b5563;
         }
-        .dark .border-gray-300 {
+        body.dark .border-gray-300 {
             border-color: #6b7280;
         }
-        .dark .text-gray-800 {
+        body.dark .text-gray-800 {
             color: #d1d5db;
         }
-        .dark .bg-indigo-600 {
+        body.dark .bg-indigo-600 {
             background-color: #4f46e5;
         }
+
         .section-container {
             transition: all 0.3s ease;
         }
@@ -231,10 +234,17 @@
             document.body.classList.toggle('dark');
             const toggle = document.querySelector('.theme-toggle');
             toggle.classList.toggle('dark');
+
             const sunIcon = document.querySelector('.sun-icon');
             const moonIcon = document.querySelector('.moon-icon');
-            sunIcon.classList.toggle('hidden');
-            moonIcon.classList.toggle('hidden');
+
+            if (document.body.classList.contains('dark')) {
+                sunIcon.classList.add('hidden');
+                moonIcon.classList.remove('hidden');
+            } else {
+                sunIcon.classList.remove('hidden');
+                moonIcon.classList.add('hidden');
+            }
         }
 
         async function processarTexto() {
@@ -246,22 +256,18 @@
 
             showLoading(true);
             try {
-                console.log('Enviando para:', `${API_URL}/processar/texto`, 'com dados:', { prompt });
                 const response = await fetch(`${API_URL}/processar/texto`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ prompt })
                 });
-                console.log('Resposta recebida:', response);
                 const data = await response.json();
-                console.log('Dados:', data);
                 if (data.status === 'sucesso') {
                     showResult(data.resultado);
                 } else {
                     showError(data.resultado || 'Erro desconhecido');
                 }
             } catch (error) {
-                console.error('Erro capturado:', error);
                 showError('Erro: ' + error.message);
             } finally {
                 showLoading(false);
