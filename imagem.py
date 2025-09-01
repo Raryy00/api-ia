@@ -5,34 +5,36 @@ import os
 from dotenv import load_dotenv
 import base64
 
-# Carregar variáveis de ambiente do arquivo .env
+# Carregar variáveis de ambiente do arquivo .env (apenas para desenvolvimento local)
 load_dotenv()
 
-# Configuração da API
+# Configuração da API (não levantar erro aqui; verificar no runtime)
 try:
     api_key = os.getenv('GEMINI_API_KEY')
-    if not api_key:
-        raise ValueError("Chave de API não encontrada. Defina a variável de ambiente GEMINI_API_KEY.")
-    genai.configure(api_key=api_key)
+    if api_key:
+        genai.configure(api_key=api_key)
+    # Se não houver chave, não configure agora; verifique nas funções
 except Exception as e:
-    print(f"Erro ao configurar a API: {e}")
-    raise
+    print(f"Aviso: Erro ao configurar a API no import: {e}")
 
-# Inicializa o modelo
-try:
-    model = genai.GenerativeModel('gemini-1.5-flash')
-except Exception as e:
-    print(f"Erro ao inicializar o modelo: {e}")
-    raise
+# Inicializa o modelo (opcional; pode ser lazy loading nas funções)
+model = None
 
 def processar_imagem(prompt: str, image_data: bytes) -> str:
     """
     Processa uma imagem com IA baseado no prompt fornecido
     """
+    global model
     try:
         # Verificar se a chave de API está configurada
         if not os.getenv('GEMINI_API_KEY'):
-            return "Erro: Chave de API GEMINI_API_KEY não configurada"
+            return "Erro: Chave de API GEMINI_API_KEY não configurada. Configure no ambiente."
+        
+        # Configurar se ainda não foi
+        if not model:
+            api_key = os.getenv('GEMINI_API_KEY')
+            genai.configure(api_key=api_key)
+            model = genai.GenerativeModel('gemini-1.5-flash')
         
         # Converter bytes para imagem PIL
         image = Image.open(BytesIO(image_data))
@@ -53,7 +55,7 @@ def processar_imagem(prompt: str, image_data: bytes) -> str:
                         }
                     },
                     {
-                        "text": prompt  # Removido "em português"
+                        "text": prompt  # Detecção automática de idioma
                     }
                 ]
             }
