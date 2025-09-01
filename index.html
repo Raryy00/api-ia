@@ -45,37 +45,121 @@
             position: relative;
             display: inline-flex;
             align-items: center;
+            gap: 1rem;
         }
         #preview-imagem {
-            max-width: 150px;
-            max-height: 150px;
+            max-width: 200px;
+            max-height: 200px;
             object-fit: contain;
-            border: 1px solid #e5e7eb;
-            border-radius: 0.375rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 0.5rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             display: none;
+            margin-top: 1rem;
+        }
+        #preview-pdf {
+            max-width: 200px;
+            max-height: 200px;
+            border: 2px solid #e5e7eb;
+            border-radius: 0.5rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: none;
+            margin-top: 1rem;
+        }
+        .theme-toggle {
+            position: relative;
+            width: 60px;
+            height: 34px;
+            background: #ccc;
+            border-radius: 9999px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .theme-toggle.dark {
+            background: #4b5563;
+        }
+        .theme-toggle-slider {
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            width: 26px;
+            height: 26px;
+            background: #fff;
+            border-radius: 50%;
+            transition: transform 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .theme-toggle.dark .theme-toggle-slider {
+            transform: translateX(26px);
+        }
+        .theme-toggle .sun-icon,
+        .theme-toggle .moon-icon {
+            width: 18px;
+            height: 18px;
+        }
+        body {
+            background-color: #f3f4f6; /* Light mode background */
+            color: #1f2937;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        .dark body {
+            background-color: #111827; /* Dark mode background */
+            color: #f9fafb;
+        }
+        .dark .bg-white {
+            background-color: #374151;
+        }
+        .dark .bg-gray-50 {
+            background-color: #4b5563;
+        }
+        .dark .border-gray-300 {
+            border-color: #6b7280;
+        }
+        .dark .text-gray-800 {
+            color: #d1d5db;
+        }
+        .dark .bg-indigo-600 {
+            background-color: #4f46e5;
+        }
+        .section-container {
+            transition: all 0.3s ease;
         }
     </style>
 </head>
-<body class="bg-gray-100 min-h-screen flex flex-col">
+<body class="min-h-screen flex flex-col transition-colors duration-300">
     <header class="bg-indigo-600 text-white py-6">
-        <div class="container mx-auto px-4">
-            <h1 class="text-3xl font-bold">Serviços de Inteligência Artificial</h1>
-            <p class="mt-2 text-lg">Processamento de textos, imagens e PDFs com IA Gemini</p>
+        <div class="container mx-auto px-4 flex justify-between items-center">
+            <div>
+                <h1 class="text-3xl font-bold">Serviços de Inteligência Artificial</h1>
+                <p class="mt-2 text-lg">Processamento de textos, imagens e PDFs com IA Gemini</p>
+            </div>
+            <div class="theme-toggle" onclick="toggleTheme()">
+                <div class="theme-toggle-slider">
+                    <svg class="sun-icon" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M10 2a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 0110 2zM10 15a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 0110 15zM10 7a3 3 0 100 6 3 3 0 000-6zM15.657 5.757a.75.75 0 010 1.061l-1.061 1.061a.75.75 0 01-1.061-1.061l1.061-1.061a.75.75 0 011.061 0zM6.343 14.243a.75.75 0 010 1.061l-1.061 1.061a.75.75 0 01-1.061-1.061l1.061-1.061a.75.75 0 011.061 0zM15.657 14.243a.75.75 0 010-1.061l1.061-1.061a.75.75 0 011.061 1.061l-1.061 1.061a.75.75 0 01-1.061 0zM6.343 5.757a.75.75 0 011.061 0l1.061 1.061a.75.75 0 01-1.061 1.061l-1.061-1.061a.75.75 0 010-1.061zM3 10a.75.75 0 01-.75-.75v-1.5a.75.75 0 011.5 0v1.5A.75.75 0 013 10zM17 10a.75.75 0 01-.75-.75v-1.5a.75.75 0 011.5 0v1.5A.75.75 0 0117 10z"/>
+                    </svg>
+                    <svg class="moon-icon hidden" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/>
+                    </svg>
+                </div>
+            </div>
         </div>
     </header>
 
     <main class="container mx-auto px-4 py-8 flex-grow">
-        <section class="bg-white rounded-lg shadow-md p-6 mb-6">
-            <h2 class="text-xl font-semibold mb-4">Processar Texto</h2>
+        <section class="bg-white rounded-lg shadow-md p-6 mb-6 section-container">
+            <h2 class="text-xl font-semibold mb-4 text-gray-800">Processar Texto</h2>
             <div class="flex flex-col sm:flex-row gap-4">
                 <input type="text" id="prompt-texto" placeholder="Digite seu prompt (ex.: Explique o que é IA)" class="flex-grow border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
                 <button onclick="processarTexto()" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition">Enviar</button>
             </div>
         </section>
 
-        <section class="bg-white rounded-lg shadow-md p-6 mb-6">
-            <h2 class="text-xl font-semibold mb-4">Processar Imagem</h2>
-            <div class="flex flex-col sm:flex-row gap-4 items-center">
+        <section class="bg-white rounded-lg shadow-md p-6 mb-6 section-container">
+            <h2 class="text-xl font-semibold mb-4 text-gray-800">Processar Imagem</h2>
+            <div class="flex flex-col sm:flex-row gap-4 items-start">
                 <input type="text" id="prompt-imagem" placeholder="Digite o prompt (ex.: Descreva esta imagem)" class="flex-grow border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
                 <div class="file-input-container">
                     <input type="file" id="file-imagem" accept="image/*" class="custom-file-input" onchange="previewImagem()">
@@ -86,32 +170,28 @@
             </div>
         </section>
 
-        <section class="bg-white rounded-lg shadow-md p-6 mb-6">
-            <h2 class="text-xl font-semibold mb-4">Processar PDF</h2>
-            <div class="flex flex-col sm:flex-row gap-4 items-center">
+        <section class="bg-white rounded-lg shadow-md p-6 mb-6 section-container">
+            <h2 class="text-xl font-semibold mb-4 text-gray-800">Processar PDF</h2>
+            <div class="flex flex-col sm:flex-row gap-4 items-start">
                 <input type="text" id="prompt-pdf" placeholder="Digite o prompt (ex.: Resuma este PDF)" class="flex-grow border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
                 <div class="file-input-container">
-                    <input type="file" id="file-pdf" accept=".pdf" class="custom-file-input">
+                    <input type="file" id="file-pdf" accept=".pdf" class="custom-file-input" onchange="previewPdf()">
                     <label for="file-pdf" class="file-button">Escolher arquivo</label>
+                    <canvas id="preview-pdf"></canvas>
                 </div>
                 <button onclick="processarPdf()" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition">Enviar</button>
             </div>
         </section>
 
-        <section class="bg-white rounded-lg shadow-md p-6">
-            <h2 class="text-xl font-semibold mb-4">Resultado</h2>
+        <section class="bg-white rounded-lg shadow-md p-6 section-container">
+            <h2 class="text-xl font-semibold mb-4 text-gray-800">Resultado</h2>
             <div id="resultado" class="border border-gray-300 rounded-md p-4 bg-gray-50 min-h-[100px]"></div>
             <div id="loading" class="hidden text-indigo-600 font-medium mt-2">Processando...</div>
             <div id="erro" class="hidden text-red-600 font-medium mt-2"></div>
         </section>
     </main>
 
-    <footer class="bg-gray-800 text-white py-4">
-        <div class="container mx-auto px-4 text-center">
-            <p>&copy; 2025 API de Serviços de IA. Todos os direitos reservados.</p>
-        </div>
-    </footer>
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
     <script>
         const API_URL = 'https://api-ia-production.up.railway.app';
 
@@ -125,6 +205,36 @@
                 preview.src = '#';
                 preview.style.display = 'none';
             }
+        }
+
+        async function previewPdf() {
+            const file = document.getElementById('file-pdf').files[0];
+            const canvas = document.getElementById('preview-pdf');
+            if (file) {
+                const url = URL.createObjectURL(file);
+                const pdf = await pdfjsLib.getDocument(url).promise;
+                const page = await pdf.getPage(1);
+                const viewport = page.getViewport({ scale: 0.3 });
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
+                await page.render({
+                    canvasContext: canvas.getContext('2d'),
+                    viewport: viewport
+                }).promise;
+                canvas.style.display = 'block';
+            } else {
+                canvas.style.display = 'none';
+            }
+        }
+
+        function toggleTheme() {
+            document.body.classList.toggle('dark');
+            const toggle = document.querySelector('.theme-toggle');
+            toggle.classList.toggle('dark');
+            const sunIcon = document.querySelector('.sun-icon');
+            const moonIcon = document.querySelector('.moon-icon');
+            sunIcon.classList.toggle('hidden');
+            moonIcon.classList.toggle('hidden');
         }
 
         async function processarTexto() {
