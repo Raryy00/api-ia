@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 # Carregar variáveis de ambiente do arquivo .env
 load_dotenv()
 
-# Importe suas funções (ajuste os caminhos se necessário)
+# Importe suas funções
 try:
     from imagem import processar_imagem
     from pdf import processar_pdf
@@ -31,10 +31,13 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Adicionar middleware CORS
+# Adicionar middleware CORS - ATUALIZADO para GitHub Pages
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:8080"],  # Permitir frontend local
+    allow_origins=[
+        "http://localhost:8080",  # Desenvolvimento local
+        "https://raryy00.github.io"  # GitHub Pages
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

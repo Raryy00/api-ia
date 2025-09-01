@@ -7,13 +7,12 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
-        /* Estilo adicional para o resultado */
         #resultado { 
             white-space: pre-wrap; 
             line-height: 1.6;
         }
         #resultado strong {
-            font-weight: 700; /* Negrito para **texto** */
+            font-weight: 700;
         }
         #resultado ul {
             list-style-type: disc;
@@ -23,7 +22,6 @@
         #resultado li {
             margin-bottom: 0.5rem;
         }
-        /* Personalizar o input file */
         .custom-file-input {
             width: 0.1px;
             height: 0.1px;
@@ -31,7 +29,6 @@
             position: absolute;
             z-index: -1;
         }
-        /* Estilo para o botão personalizado */
         .file-button {
             display: inline-block;
             background: #4f46e5;
@@ -44,13 +41,11 @@
         .file-button:hover {
             background: #4338ca;
         }
-        /* Contêiner para o botão e input */
         .file-input-container {
             position: relative;
             display: inline-flex;
             align-items: center;
         }
-        /* Estilo para a miniatura da imagem */
         #preview-imagem {
             max-width: 150px;
             max-height: 150px;
@@ -62,7 +57,6 @@
     </style>
 </head>
 <body class="bg-gray-100 min-h-screen flex flex-col">
-    <!-- Header -->
     <header class="bg-indigo-600 text-white py-6">
         <div class="container mx-auto px-4">
             <h1 class="text-3xl font-bold">Serviços de Inteligência Artificial</h1>
@@ -70,86 +64,40 @@
         </div>
     </header>
 
-    <!-- Main Content -->
     <main class="container mx-auto px-4 py-8 flex-grow">
-        <!-- Texto Section -->
         <section class="bg-white rounded-lg shadow-md p-6 mb-6">
             <h2 class="text-xl font-semibold mb-4">Processar Texto</h2>
             <div class="flex flex-col sm:flex-row gap-4">
-                <input
-                    type="text"
-                    id="prompt-texto"
-                    placeholder="Digite seu prompt (ex.: Explique o que é IA)"
-                    class="flex-grow border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                >
-                <button
-                    onclick="processarTexto()"
-                    class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition"
-                >
-                    Enviar
-                </button>
+                <input type="text" id="prompt-texto" placeholder="Digite seu prompt (ex.: Explique o que é IA)" class="flex-grow border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <button onclick="processarTexto()" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition">Enviar</button>
             </div>
         </section>
 
-        <!-- Imagem Section -->
         <section class="bg-white rounded-lg shadow-md p-6 mb-6">
             <h2 class="text-xl font-semibold mb-4">Processar Imagem</h2>
             <div class="flex flex-col sm:flex-row gap-4 items-center">
-                <input
-                    type="text"
-                    id="prompt-imagem"
-                    placeholder="Digite o prompt (ex.: Descreva esta imagem)"
-                    class="flex-grow border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                >
+                <input type="text" id="prompt-imagem" placeholder="Digite o prompt (ex.: Descreva esta imagem)" class="flex-grow border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
                 <div class="file-input-container">
-                    <input
-                        type="file"
-                        id="file-imagem"
-                        accept="image/*"
-                        class="custom-file-input"
-                        onchange="previewImagem()"
-                    >
+                    <input type="file" id="file-imagem" accept="image/*" class="custom-file-input" onchange="previewImagem()">
                     <label for="file-imagem" class="file-button">Escolher arquivo</label>
                     <img id="preview-imagem" src="#" alt="Pré-visualização da imagem">
                 </div>
-                <button
-                    onclick="processarImagem()"
-                    class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition"
-                >
-                    Enviar
-                </button>
+                <button onclick="processarImagem()" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition">Enviar</button>
             </div>
         </section>
 
-        <!-- PDF Section -->
         <section class="bg-white rounded-lg shadow-md p-6 mb-6">
             <h2 class="text-xl font-semibold mb-4">Processar PDF</h2>
             <div class="flex flex-col sm:flex-row gap-4 items-center">
-                <input
-                    type="text"
-                    id="prompt-pdf"
-                    placeholder="Digite o prompt (ex.: Resuma este PDF)"
-                    class="flex-grow border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                >
+                <input type="text" id="prompt-pdf" placeholder="Digite o prompt (ex.: Resuma este PDF)" class="flex-grow border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
                 <div class="file-input-container">
-                    <input
-                        type="file"
-                        id="file-pdf"
-                        accept=".pdf"
-                        class="custom-file-input"
-                    >
+                    <input type="file" id="file-pdf" accept=".pdf" class="custom-file-input">
                     <label for="file-pdf" class="file-button">Escolher arquivo</label>
                 </div>
-                <button
-                    onclick="processarPdf()"
-                    class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition"
-                >
-                    Enviar
-                </button>
+                <button onclick="processarPdf()" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition">Enviar</button>
             </div>
         </section>
 
-        <!-- Resultado Section -->
         <section class="bg-white rounded-lg shadow-md p-6">
             <h2 class="text-xl font-semibold mb-4">Resultado</h2>
             <div id="resultado" class="border border-gray-300 rounded-md p-4 bg-gray-50 min-h-[100px]"></div>
@@ -158,7 +106,6 @@
         </section>
     </main>
 
-    <!-- Footer -->
     <footer class="bg-gray-800 text-white py-4">
         <div class="container mx-auto px-4 text-center">
             <p>&copy; 2025 API de Serviços de IA. Todos os direitos reservados.</p>
@@ -189,18 +136,22 @@
 
             showLoading(true);
             try {
+                console.log('Enviando para:', `${API_URL}/processar/texto`, 'com dados:', { prompt });
                 const response = await fetch(`${API_URL}/processar/texto`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ prompt })
                 });
+                console.log('Resposta recebida:', response);
                 const data = await response.json();
+                console.log('Dados:', data);
                 if (data.status === 'sucesso') {
                     showResult(data.resultado);
                 } else {
                     showError(data.resultado || 'Erro desconhecido');
                 }
             } catch (error) {
+                console.error('Erro capturado:', error);
                 showError('Erro: ' + error.message);
             } finally {
                 showLoading(false);
@@ -277,7 +228,7 @@
         function showResult(text) {
             const resultado = document.getElementById('resultado');
             const erro = document.getElementById('erro');
-            resultado.innerHTML = marked.parse(text); // Converte Markdown para HTML
+            resultado.innerHTML = marked.parse(text);
             erro.classList.add('hidden');
         }
 
