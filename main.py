@@ -35,8 +35,8 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://localhost:8080",  # Desenvolvimento local
-        "https://raryy00.github.io"  # GitHub Pages
+        "http://localhost:8080",
+        "https://raryy00.github.io"
     ],
     allow_credentials=True,
     allow_methods=["*"],

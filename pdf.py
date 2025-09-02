@@ -46,7 +46,7 @@ def processar_pdf(prompt: str, pdf_data: bytes) -> str:
                     }
                     },
                     {
-                        "text": prompt  # Detecção automática de idioma
+                        "text": prompt 
                     }
                 ]
             }
