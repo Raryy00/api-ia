@@ -36,11 +36,12 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:8080",
+        "http://localhost",
         "https://raryy00.github.io"
     ],
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["*"],  # Permite todos os métodos, inclusive OPTIONS
+    allow_headers=["*"],  # Permite todos os headers
 )
 
 @app.get("/")
