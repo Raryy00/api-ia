@@ -6,6 +6,7 @@
     <title>Serviços de IA - Interface</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
     <style>
         #resultado { 
             white-space: pre-wrap; 
@@ -47,6 +48,25 @@
             align-items: center;
             gap: 1rem;
         }
+        #preview-imagem {
+            max-width: 200px;
+            max-height: 200px;
+            object-fit: contain;
+            border: 2px solid #e5e7eb;
+            border-radius: 0.5rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: none;
+            margin-top: 1rem;
+        }
+        #preview-pdf {
+            max-width: 200px;
+            max-height: 200px;
+            border: 2px solid #e5e7eb;
+            border-radius: 0.5rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: none;
+            margin-top: 1rem;
+        }
         .theme-toggle {
             position: relative;
             width: 60px;
@@ -80,13 +100,15 @@
             width: 18px;
             height: 18px;
         }
+
+        /* Fundo claro/escuro */
         body {
-            background-color: #f3f4f6;
+            background-color: #f3f4f6; /* Claro */
             color: #1f2937;
             transition: background-color 0.3s ease, color 0.3s ease;
         }
         body.dark {
-            background-color: #111827;
+            background-color: #111827; /* Escuro */
             color: #f9fafb;
         }
         body.dark .bg-white {
@@ -104,13 +126,21 @@
         body.dark .bg-indigo-600 {
             background-color: #4f46e5;
         }
+
         .section-container {
             transition: all 0.3s ease;
         }
-        .disabled-button {
-            background-color: #6b7280;
-            cursor: not-allowed;
-            pointer-events: none;
+
+        /* Reorganização: Layout em grid para melhor responsividade em telas maiores */
+        @media (min-width: 768px) {
+            .input-sections {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 1.5rem;
+            }
+            .result-section {
+                grid-column: span 3;
+            }
         }
     </style>
 </head>
@@ -133,7 +163,8 @@
             </div>
         </div>
     </header>
-    <main class="container mx-auto px-4 py-8 flex-grow">
+
+<main class="container mx-auto px-4 py-8 flex-grow">
         <section class="bg-white rounded-lg shadow-md p-6 mb-6 section-container">
             <h2 class="text-xl font-semibold mb-4 text-gray-800">Processar Texto</h2>
             <div class="flex flex-col sm:flex-row gap-4">
@@ -170,19 +201,50 @@
             <div id="erro" class="hidden text-red-600 font-medium mt-2"></div>
         </section>
     </main>
-    <script>
-        // Substituição por variável de ambiente
-        const API_URL = process.env.API_URL || 'https://api-ia-production.up.railway.app';
 
-        // Estado global para rastrear se uma requisição está em andamento
-        let isProcessing = false;
+    <script>
+        const API_URL = 'http://localhost:8000';
+
+        function previewImagem() {
+            const file = document.getElementById('file-imagem').files[0];
+            const preview = document.getElementById('preview-imagem');
+            if (file) {
+                preview.src = URL.createObjectURL(file);
+                preview.style.display = 'block';
+            } else {
+                preview.src = '#';
+                preview.style.display = 'none';
+            }
+        }
+
+        async function previewPdf() {
+            const file = document.getElementById('file-pdf').files[0];
+            const canvas = document.getElementById('preview-pdf');
+            if (file) {
+                const url = URL.createObjectURL(file);
+                const pdf = await pdfjsLib.getDocument(url).promise;
+                const page = await pdf.getPage(1);
+                const viewport = page.getViewport({ scale: 0.3 });
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
+                await page.render({
+                    canvasContext: canvas.getContext('2d'),
+                    viewport: viewport
+                }).promise;
+                canvas.style.display = 'block';
+            } else {
+                canvas.style.display = 'none';
+            }
+        }
 
         function toggleTheme() {
             document.body.classList.toggle('dark');
             const toggle = document.querySelector('.theme-toggle');
             toggle.classList.toggle('dark');
+
             const sunIcon = document.querySelector('.sun-icon');
             const moonIcon = document.querySelector('.moon-icon');
+
             if (document.body.classList.contains('dark')) {
                 sunIcon.classList.add('hidden');
                 moonIcon.classList.remove('hidden');
@@ -192,33 +254,10 @@
             }
         }
 
-        function disableButtons(disable) {
-            const buttons = [
-                document.getElementById('texto-button'),
-                document.getElementById('imagem-button'),
-                document.getElementById('pdf-button')
-            ];
-            buttons.forEach(button => {
-                if (disable) {
-                    button.classList.add('disabled-button');
-                    button.disabled = true;
-                } else {
-                    button.classList.remove('disabled-button');
-                    button.disabled = false;
-                }
-            });
-        }
-
         async function processarTexto() {
-            if (isProcessing) return;
-            isProcessing = true;
-            disableButtons(true);
-
             const prompt = document.getElementById('prompt-texto').value;
             if (!prompt) {
                 showError('Digite um prompt!');
-                isProcessing = false;
-                disableButtons(false);
                 return;
             }
 
@@ -239,22 +278,14 @@
                 showError('Erro: ' + error.message);
             } finally {
                 showLoading(false);
-                isProcessing = false;
-                disableButtons(false);
             }
         }
 
         async function processarImagem() {
-            if (isProcessing) return;
-            isProcessing = true;
-            disableButtons(true);
-
             const prompt = document.getElementById('prompt-imagem').value;
             const file = document.getElementById('file-imagem').files[0];
             if (!prompt || !file) {
                 showError('Digite um prompt e selecione uma imagem!');
-                isProcessing = false;
-                disableButtons(false);
                 return;
             }
 
@@ -276,22 +307,14 @@
                 showError('Erro: ' + error.message);
             } finally {
                 showLoading(false);
-                isProcessing = false;
-                disableButtons(false);
             }
         }
 
         async function processarPdf() {
-            if (isProcessing) return;
-            isProcessing = true;
-            disableButtons(true);
-
             const prompt = document.getElementById('prompt-pdf').value;
             const file = document.getElementById('file-pdf').files[0];
             if (!prompt || !file) {
                 showError('Digite um prompt e selecione um PDF!');
-                isProcessing = false;
-                disableButtons(false);
                 return;
             }
 
@@ -313,8 +336,6 @@
                 showError('Erro: ' + error.message);
             } finally {
                 showLoading(false);
-                isProcessing = false;
-                disableButtons(false);
             }
         }
 
