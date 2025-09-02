@@ -100,15 +100,13 @@
             width: 18px;
             height: 18px;
         }
-
-        /* Fundo claro/escuro */
         body {
-            background-color: #f3f4f6; /* Claro */
+            background-color: #f3f4f6;
             color: #1f2937;
             transition: background-color 0.3s ease, color 0.3s ease;
         }
         body.dark {
-            background-color: #111827; /* Escuro */
+            background-color: #111827;
             color: #f9fafb;
         }
         body.dark .bg-white {
@@ -126,12 +124,14 @@
         body.dark .bg-indigo-600 {
             background-color: #4f46e5;
         }
-
         .section-container {
             transition: all 0.3s ease;
         }
-
-        /* Reorganização: Layout em grid para melhor responsividade em telas maiores */
+        .disabled-button {
+            background-color: #6b7280;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
         @media (min-width: 768px) {
             .input-sections {
                 display: grid;
@@ -163,17 +163,15 @@
             </div>
         </div>
     </header>
-
     <main class="container mx-auto px-4 py-8 flex-grow">
         <div class="input-sections">
             <section class="bg-white rounded-lg shadow-md p-6 mb-6 section-container">
                 <h2 class="text-xl font-semibold mb-4 text-gray-800">Processar Texto</h2>
                 <div class="flex flex-col gap-4">
                     <input type="text" id="prompt-texto" placeholder="Digite seu prompt (ex.: Explique o que é IA)" class="flex-grow border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                    <button onclick="processarTexto()" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition">Enviar</button>
+                    <button id="texto-button" onclick="processarTexto()" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition">Enviar</button>
                 </div>
             </section>
-
             <section class="bg-white rounded-lg shadow-md p-6 mb-6 section-container">
                 <h2 class="text-xl font-semibold mb-4 text-gray-800">Processar Imagem</h2>
                 <div class="flex flex-col gap-4">
@@ -183,10 +181,9 @@
                         <label for="file-imagem" class="file-button">Escolher arquivo</label>
                         <img id="preview-imagem" src="#" alt="Pré-visualização da imagem">
                     </div>
-                    <button onclick="processarImagem()" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition">Enviar</button>
+                    <button id="imagem-button" onclick="processarImagem()" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition">Enviar</button>
                 </div>
             </section>
-
             <section class="bg-white rounded-lg shadow-md p-6 mb-6 section-container">
                 <h2 class="text-xl font-semibold mb-4 text-gray-800">Processar PDF</h2>
                 <div class="flex flex-col gap-4">
@@ -196,11 +193,10 @@
                         <label for="file-pdf" class="file-button">Escolher arquivo</label>
                         <canvas id="preview-pdf"></canvas>
                     </div>
-                    <button onclick="processarPdf()" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition">Enviar</button>
+                    <button id="pdf-button" onclick="processarPdf()" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition">Enviar</button>
                 </div>
             </section>
         </div>
-
         <section class="bg-white rounded-lg shadow-md p-6 section-container result-section">
             <h2 class="text-xl font-semibold mb-4 text-gray-800">Resultado</h2>
             <div id="resultado" class="border border-gray-300 rounded-md p-4 bg-gray-50 min-h-[100px]"></div>
@@ -208,9 +204,12 @@
             <div id="erro" class="hidden text-red-600 font-medium mt-2"></div>
         </section>
     </main>
-
     <script>
-        const API_URL = 'https://api-ia-production.up.railway.app';
+        // Substituição por variável de ambiente
+        const API_URL = process.env.API_URL || 'https://api-ia-production.up.railway.app';
+
+        // Estado global para rastrear se uma requisição está em andamento
+        let isProcessing = false;
 
         function previewImagem() {
             const file = document.getElementById('file-imagem').files[0];
@@ -248,10 +247,8 @@
             document.body.classList.toggle('dark');
             const toggle = document.querySelector('.theme-toggle');
             toggle.classList.toggle('dark');
-
             const sunIcon = document.querySelector('.sun-icon');
             const moonIcon = document.querySelector('.moon-icon');
-
             if (document.body.classList.contains('dark')) {
                 sunIcon.classList.add('hidden');
                 moonIcon.classList.remove('hidden');
@@ -261,10 +258,33 @@
             }
         }
 
+        function disableButtons(disable) {
+            const buttons = [
+                document.getElementById('texto-button'),
+                document.getElementById('imagem-button'),
+                document.getElementById('pdf-button')
+            ];
+            buttons.forEach(button => {
+                if (disable) {
+                    button.classList.add('disabled-button');
+                    button.disabled = true;
+                } else {
+                    button.classList.remove('disabled-button');
+                    button.disabled = false;
+                }
+            });
+        }
+
         async function processarTexto() {
+            if (isProcessing) return; // Impede múltiplos cliques
+            isProcessing = true;
+            disableButtons(true);
+
             const prompt = document.getElementById('prompt-texto').value;
             if (!prompt) {
                 showError('Digite um prompt!');
+                isProcessing = false;
+                disableButtons(false);
                 return;
             }
 
@@ -285,14 +305,22 @@
                 showError('Erro: ' + error.message);
             } finally {
                 showLoading(false);
+                isProcessing = false;
+                disableButtons(false);
             }
         }
 
         async function processarImagem() {
+            if (isProcessing) return; // Impede múltiplos cliques
+            isProcessing = true;
+            disableButtons(true);
+
             const prompt = document.getElementById('prompt-imagem').value;
             const file = document.getElementById('file-imagem').files[0];
             if (!prompt || !file) {
                 showError('Digite um prompt e selecione uma imagem!');
+                isProcessing = false;
+                disableButtons(false);
                 return;
             }
 
@@ -314,14 +342,22 @@
                 showError('Erro: ' + error.message);
             } finally {
                 showLoading(false);
+                isProcessing = false;
+                disableButtons(false);
             }
         }
 
         async function processarPdf() {
+            if (isProcessing) return; // Impede múltiplos cliques
+            isProcessing = true;
+            disableButtons(true);
+
             const prompt = document.getElementById('prompt-pdf').value;
             const file = document.getElementById('file-pdf').files[0];
             if (!prompt || !file) {
                 showError('Digite um prompt e selecione um PDF!');
+                isProcessing = false;
+                disableButtons(false);
                 return;
             }
 
@@ -343,6 +379,8 @@
                 showError('Erro: ' + error.message);
             } finally {
                 showLoading(false);
+                isProcessing = false;
+                disableButtons(false);
             }
         }
 
