@@ -1,4 +1,4 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -6,6 +6,7 @@
     <title>Serviços de IA - Interface</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
     <style>
         #resultado { 
             white-space: pre-wrap; 
@@ -129,6 +130,18 @@
         .section-container {
             transition: all 0.3s ease;
         }
+
+        /* Reorganização: Layout em grid para melhor responsividade em telas maiores */
+        @media (min-width: 768px) {
+            .input-sections {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 1.5rem;
+            }
+            .result-section {
+                grid-column: span 3;
+            }
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col transition-colors duration-300">
@@ -152,41 +165,43 @@
     </header>
 
     <main class="container mx-auto px-4 py-8 flex-grow">
-        <section class="bg-white rounded-lg shadow-md p-6 mb-6 section-container">
-            <h2 class="text-xl font-semibold mb-4 text-gray-800">Processar Texto</h2>
-            <div class="flex flex-col sm:flex-row gap-4">
-                <input type="text" id="prompt-texto" placeholder="Digite seu prompt (ex.: Explique o que é IA)" class="flex-grow border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                <button onclick="processarTexto()" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition">Enviar</button>
-            </div>
-        </section>
-
-        <section class="bg-white rounded-lg shadow-md p-6 mb-6 section-container">
-            <h2 class="text-xl font-semibold mb-4 text-gray-800">Processar Imagem</h2>
-            <div class="flex flex-col sm:flex-row gap-4 items-start">
-                <input type="text" id="prompt-imagem" placeholder="Digite o prompt (ex.: Descreva esta imagem)" class="flex-grow border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                <div class="file-input-container">
-                    <input type="file" id="file-imagem" accept="image/*" class="custom-file-input" onchange="previewImagem()">
-                    <label for="file-imagem" class="file-button">Escolher arquivo</label>
-                    <img id="preview-imagem" src="#" alt="Pré-visualização da imagem">
+        <div class="input-sections">
+            <section class="bg-white rounded-lg shadow-md p-6 mb-6 section-container">
+                <h2 class="text-xl font-semibold mb-4 text-gray-800">Processar Texto</h2>
+                <div class="flex flex-col gap-4">
+                    <input type="text" id="prompt-texto" placeholder="Digite seu prompt (ex.: Explique o que é IA)" class="flex-grow border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <button onclick="processarTexto()" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition">Enviar</button>
                 </div>
-                <button onclick="processarImagem()" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition">Enviar</button>
-            </div>
-        </section>
+            </section>
 
-        <section class="bg-white rounded-lg shadow-md p-6 mb-6 section-container">
-            <h2 class="text-xl font-semibold mb-4 text-gray-800">Processar PDF</h2>
-            <div class="flex flex-col sm:flex-row gap-4 items-start">
-                <input type="text" id="prompt-pdf" placeholder="Digite o prompt (ex.: Resuma este PDF)" class="flex-grow border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                <div class="file-input-container">
-                    <input type="file" id="file-pdf" accept=".pdf" class="custom-file-input" onchange="previewPdf()">
-                    <label for="file-pdf" class="file-button">Escolher arquivo</label>
-                    <canvas id="preview-pdf"></canvas>
+            <section class="bg-white rounded-lg shadow-md p-6 mb-6 section-container">
+                <h2 class="text-xl font-semibold mb-4 text-gray-800">Processar Imagem</h2>
+                <div class="flex flex-col gap-4">
+                    <input type="text" id="prompt-imagem" placeholder="Digite o prompt (ex.: Descreva esta imagem)" class="flex-grow border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <div class="file-input-container">
+                        <input type="file" id="file-imagem" accept="image/*" class="custom-file-input" onchange="previewImagem()">
+                        <label for="file-imagem" class="file-button">Escolher arquivo</label>
+                        <img id="preview-imagem" src="#" alt="Pré-visualização da imagem">
+                    </div>
+                    <button onclick="processarImagem()" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition">Enviar</button>
                 </div>
-                <button onclick="processarPdf()" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition">Enviar</button>
-            </div>
-        </section>
+            </section>
 
-        <section class="bg-white rounded-lg shadow-md p-6 section-container">
+            <section class="bg-white rounded-lg shadow-md p-6 mb-6 section-container">
+                <h2 class="text-xl font-semibold mb-4 text-gray-800">Processar PDF</h2>
+                <div class="flex flex-col gap-4">
+                    <input type="text" id="prompt-pdf" placeholder="Digite o prompt (ex.: Resuma este PDF)" class="flex-grow border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <div class="file-input-container">
+                        <input type="file" id="file-pdf" accept=".pdf" class="custom-file-input" onchange="previewPdf()">
+                        <label for="file-pdf" class="file-button">Escolher arquivo</label>
+                        <canvas id="preview-pdf"></canvas>
+                    </div>
+                    <button onclick="processarPdf()" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition">Enviar</button>
+                </div>
+            </section>
+        </div>
+
+        <section class="bg-white rounded-lg shadow-md p-6 section-container result-section">
             <h2 class="text-xl font-semibold mb-4 text-gray-800">Resultado</h2>
             <div id="resultado" class="border border-gray-300 rounded-md p-4 bg-gray-50 min-h-[100px]"></div>
             <div id="loading" class="hidden text-indigo-600 font-medium mt-2">Processando...</div>
@@ -194,7 +209,6 @@
         </section>
     </main>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
     <script>
         const API_URL = 'https://api-ia-production.up.railway.app';
 
