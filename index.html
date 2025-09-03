@@ -88,17 +88,14 @@
             background: #fff;
             border-radius: 50%;
             transition: transform 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            background-image: url('./sun.png');
+            background-size: 18px 18px;
+            background-position: center;
+            background-repeat: no-repeat;
         }
         .theme-toggle.dark .theme-toggle-slider {
             transform: translateX(26px);
-        }
-        .theme-toggle .sun-icon,
-        .theme-toggle .moon-icon {
-            width: 18px;
-            height: 18px;
+            background-image: url('./moon.png');
         }
 
         /* Fundo claro/escuro */
@@ -126,6 +123,19 @@
         body.dark .bg-indigo-600 {
             background-color: #4f46e5;
         }
+        /* Estilo para inputs no modo escuro */
+        body.dark input[type="text"] {
+            background-color: #374151; /* Fundo escuro para inputs */
+            color: #f9fafb; /* Texto claro */
+            border-color: #6b7280; /* Borda no modo escuro */
+        }
+        body.dark input[type="text"]::placeholder {
+            color: #9ca3af; /* Placeholder mais claro no modo escuro */
+        }
+        body.dark input[type="text"]:focus {
+            border-color: #4f46e5; /* Borda de foco no modo escuro */
+            ring-color: #4f46e5;
+        }
 
         .section-container {
             transition: all 0.3s ease;
@@ -152,19 +162,12 @@
                 <p class="mt-2 text-lg">Processamento de textos, imagens e PDFs com IA Gemini</p>
             </div>
             <div class="theme-toggle" onclick="toggleTheme()">
-                <div class="theme-toggle-slider">
-                    <svg class="sun-icon" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M10 2a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 0110 2zM10 15a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 0110 15zM10 7a3 3 0 100 6 3 3 0 000-6zM15.657 5.757a.75.75 0 010 1.061l-1.061 1.061a.75.75 0 01-1.061-1.061l1.061-1.061a.75.75 0 011.061 0zM6.343 14.243a.75.75 0 010 1.061l-1.061 1.061a.75.75 0 01-1.061-1.061l1.061-1.061a.75.75 0 011.061 0zM15.657 14.243a.75.75 0 010-1.061l1.061-1.061a.75.75 0 011.061 1.061l-1.061 1.061a.75.75 0 01-1.061 0zM6.343 5.757a.75.75 0 011.061 0l1.061 1.061a.75.75 0 01-1.061 1.061l-1.061-1.061a.75.75 0 010-1.061zM3 10a.75.75 0 01-.75-.75v-1.5a.75.75 0 011.5 0v1.5A.75.75 0 013 10zM17 10a.75.75 0 01-.75-.75v-1.5a.75.75 0 011.5 0v1.5A.75.75 0 0117 10z"/>
-                    </svg>
-                    <svg class="moon-icon hidden" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/>
-                    </svg>
-                </div>
+                <div class="theme-toggle-slider"></div>
             </div>
         </div>
     </header>
 
-<main class="container mx-auto px-4 py-8 flex-grow">
+    <main class="container mx-auto px-4 py-8 flex-grow">
         <section class="bg-white rounded-lg shadow-md p-6 mb-6 section-container">
             <h2 class="text-xl font-semibold mb-4 text-gray-800">Processar Texto</h2>
             <div class="flex flex-col sm:flex-row gap-4">
@@ -182,6 +185,7 @@
                 </div>
                 <button id="imagem-button" onclick="processarImagem()" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition">Enviar</button>
             </div>
+            <img id="preview-imagem" src="#" alt="Pré-visualização da imagem">
         </section>
         <section class="bg-white rounded-lg shadow-md p-6 mb-6 section-container">
             <h2 class="text-xl font-semibold mb-4 text-gray-800">Processar PDF</h2>
@@ -193,6 +197,7 @@
                 </div>
                 <button id="pdf-button" onclick="processarPdf()" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition">Enviar</button>
             </div>
+            <canvas id="preview-pdf"></canvas>
         </section>
         <section class="bg-white rounded-lg shadow-md p-6 section-container">
             <h2 class="text-xl font-semibold mb-4 text-gray-800">Resultado</h2>
@@ -241,17 +246,6 @@
             document.body.classList.toggle('dark');
             const toggle = document.querySelector('.theme-toggle');
             toggle.classList.toggle('dark');
-
-            const sunIcon = document.querySelector('.sun-icon');
-            const moonIcon = document.querySelector('.moon-icon');
-
-            if (document.body.classList.contains('dark')) {
-                sunIcon.classList.add('hidden');
-                moonIcon.classList.remove('hidden');
-            } else {
-                sunIcon.classList.remove('hidden');
-                moonIcon.classList.add('hidden');
-            }
         }
 
         async function processarTexto() {
@@ -366,6 +360,10 @@
             const loading = document.getElementById('loading');
             loading.classList.toggle('hidden', !isLoading);
         }
+
+        // Adicionar listeners para pré-visualização
+        document.getElementById('file-imagem').addEventListener('change', previewImagem);
+        document.getElementById('file-pdf').addEventListener('change', previewPdf);
     </script>
 </body>
 </html>
