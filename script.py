@@ -2,10 +2,8 @@ import google.generativeai as genai
 import os
 from dotenv import load_dotenv
 
-# Carregar variáveis de ambiente do arquivo .env (apenas para desenvolvimento local)
 load_dotenv()
 
-# Configuração da API (não levantar erro aqui)
 try:
     api_key = os.getenv('GEMINI_API_KEY')
     if api_key:
@@ -15,30 +13,26 @@ except Exception as e:
 
 model = None
 
-def processar_texto(prompt: str) -> str:
-    """
-    Processa texto com IA baseado no prompt fornecido
-    """
+def processar_texto(prompt: str) -> tuple:
     global model
     try:
-        # Verificar se a chave de API está configurada
         if not os.getenv('GEMINI_API_KEY'):
-            return "Erro: Chave de API GEMINI_API_KEY não configurada. Configure no ambiente."
+            return "Erro: Chave de API GEMINI_API_KEY não configurada.", ""
         
-        # Configurar se ainda não foi
         if not model:
             api_key = os.getenv('GEMINI_API_KEY')
             genai.configure(api_key=api_key)
             model = genai.GenerativeModel('gemini-1.5-flash')
         
-        # Gera conteúdo com o prompt original
         response = model.generate_content(prompt)
+        resultado = response.text if hasattr(response, 'text') else "Nenhuma resposta válida."
         
-        # Verifica se há texto na resposta
-        if hasattr(response, 'text') and response.text:
-            return response.text
-        else:
-            return "Nenhuma resposta válida retornada. Pode ter sido bloqueado por filtros de segurança."
-            
+        usage = ""
+        if hasattr(response, 'usage_metadata'):
+            um = response.usage_metadata
+            usage = f"Prompt tokens: {um.prompt_token_count}, Total tokens: {um.total_token_count}"
+        
+        return resultado, usage
+    
     except Exception as e:
-        return f"Erro ao processar texto: {str(e)}"
+        return f"Erro ao processar texto: {str(e)}", ""

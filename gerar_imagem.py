@@ -1,7 +1,6 @@
 import google.generativeai as genai
 import os
 from dotenv import load_dotenv
-import base64
 
 load_dotenv()
 
@@ -14,7 +13,7 @@ except Exception as e:
 
 model = None
 
-def processar_pdf(prompt: str, pdf_data: bytes) -> tuple:
+def gerar_imagem(prompt: str) -> tuple:
     global model
     try:
         if not os.getenv('GEMINI_API_KEY'):
@@ -23,28 +22,17 @@ def processar_pdf(prompt: str, pdf_data: bytes) -> tuple:
         if not model:
             api_key = os.getenv('GEMINI_API_KEY')
             genai.configure(api_key=api_key)
-            model = genai.GenerativeModel('gemini-1.5-flash')
+            model = genai.GenerativeModel('gemini-1.5-flash')  # Ajuste para model de image gen se disponível; aqui assume text-to-image via prompt
         
-        pdf_base64 = base64.b64encode(pdf_data).decode('utf-8')
-        
-        contents = [
-            {
-                "parts": [
-                    {"inline_data": {"mime_type": "application/pdf", "data": pdf_base64}},
-                    {"text": prompt}
-                ]
-            }
-        ]
-        
-        response = model.generate_content(contents)
-        resultado = response.text if hasattr(response, 'text') else "Nenhuma resposta válida."
+        response = model.generate_content(prompt)
+        resultado = response.text if hasattr(response, 'text') else "Nenhuma imagem gerada."  # Note: Para true image gen, ajuste para extrair base64
         
         usage = ""
         if hasattr(response, 'usage_metadata'):
             um = response.usage_metadata
             usage = f"Prompt tokens: {um.prompt_token_count}, Total tokens: {um.total_token_count}"
         
-        return resultado, usage
+        return resultado, usage  # Para true gen, retorne base64 da imagem
     
     except Exception as e:
-        return f"Erro ao processar PDF: {str(e)}", ""
+        return f"Erro ao gerar imagem: {str(e)}", ""

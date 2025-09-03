@@ -7,7 +7,49 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        /* Estilos gerais */
+        body {
+            background-color: #f3f4f6;
+            color: #1f2937;
+            transition: all 0.3s ease;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden; /* Evita barra de rolagem horizontal */
+        }
+        body.dark {
+            background-color: #111827;
+            color: #f9fafb;
+        }
+        /* Navbar */
+        .navbar {
+            background: linear-gradient(to right, #4f46e5, #6366f1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 1rem 0; /* Reduzido para navbar mais fina */
+        }
+        body.dark .navbar {
+            background: linear-gradient(to right, #1e3a8a, #312e81);
+        }
+        /* Scrollbar vertical */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+        body.dark ::-webkit-scrollbar-track {
+            background: #374151;
+        }
+        body.dark ::-webkit-scrollbar-thumb {
+            background: #6b7280;
+        }
+        /* Resultado */
         #resultado { 
             white-space: pre-wrap; 
             line-height: 1.6;
@@ -23,6 +65,7 @@
         #resultado li {
             margin-bottom: 0.5rem;
         }
+        /* File input */
         .custom-file-input {
             width: 0.1px;
             height: 0.1px;
@@ -48,71 +91,32 @@
             align-items: center;
             gap: 1rem;
         }
-        #preview-imagem {
+        /* Previews */
+        #previews-imagem img, #preview-gerada {
             max-width: 200px;
             max-height: 200px;
             object-fit: contain;
             border: 2px solid #e5e7eb;
             border-radius: 0.5rem;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            display: none;
             margin-top: 1rem;
+            margin-right: 1rem;
         }
-        #preview-pdf {
+        #previews-pdf canvas {
             max-width: 200px;
             max-height: 200px;
             border: 2px solid #e5e7eb;
             border-radius: 0.5rem;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            display: none;
             margin-top: 1rem;
+            margin-right: 1rem;
         }
-        .theme-toggle {
-            position: relative;
-            width: 60px;
-            height: 34px;
-            background: #ccc;
-            border-radius: 9999px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-        .theme-toggle.dark {
-            background: #4b5563;
-        }
-        .theme-toggle-slider {
-            position: absolute;
-            top: 4px;
-            left: 4px;
-            width: 26px;
-            height: 26px;
-            background: #fff;
-            border-radius: 50%;
-            transition: transform 0.3s;
-            background-image: url('./sun.png');
-            background-size: 18px 18px;
-            background-position: center;
-            background-repeat: no-repeat;
-        }
-        .theme-toggle.dark .theme-toggle-slider {
-            transform: translateX(26px);
-            background-image: url('./moon.png');
-        }
-
-        /* Fundo claro/escuro */
-        body {
-            background-color: #f3f4f6; /* Claro */
-            color: #1f2937;
-            transition: background-color 0.3s ease, color 0.3s ease;
-        }
-        body.dark {
-            background-color: #111827; /* Escuro */
-            color: #f9fafb;
-        }
+        /* Dark mode */
         body.dark .bg-white {
-            background-color: #374151;
+            background-color: #1f2937;
         }
         body.dark .bg-gray-50 {
-            background-color: #4b5563;
+            background-color: #374151;
         }
         body.dark .border-gray-300 {
             border-color: #6b7280;
@@ -123,24 +127,27 @@
         body.dark .bg-indigo-600 {
             background-color: #4f46e5;
         }
-        /* Estilo para inputs no modo escuro */
-        body.dark input[type="text"] {
-            background-color: #374151; /* Fundo escuro para inputs */
-            color: #f9fafb; /* Texto claro */
-            border-color: #6b7280; /* Borda no modo escuro */
-        }
-        body.dark input[type="text"]::placeholder {
-            color: #9ca3af; /* Placeholder mais claro no modo escuro */
+        body.dark input[type="text"], body.dark input[type="text"]::placeholder {
+            background-color: #374151;
+            color: #f9fafb;
+            border-color: #6b7280;
         }
         body.dark input[type="text"]:focus {
-            border-color: #4f46e5; /* Borda de foco no modo escuro */
+            border-color: #4f46e5;
         }
-
+        body.dark #historico {
+            background: #374151;
+            border-color: #6b7280;
+        }
+        /* Animations */
         .section-container {
-            transition: all 0.3s ease;
+            animation: fadeIn 0.5s ease-in-out;
         }
-
-        /* Reorganização: Layout em grid para melhor responsividade em telas maiores */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        /* Responsive */
         @media (min-width: 768px) {
             .input-sections {
                 display: grid;
@@ -151,80 +158,146 @@
                 grid-column: span 3;
             }
         }
+        @media (max-width: 767px) {
+            .flex-col {
+                flex-direction: column;
+            }
+            button {
+                width: 100%;
+            }
+            .navbar .flex {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+        #historico {
+            display: none;
+            margin-top: 1rem;
+            border: 1px solid #e5e7eb;
+            padding: 1rem;
+            background: #f9fafb;
+            border-radius: 0.5rem;
+        }
+        /* Container */
+        .container {
+            max-width: 100%; /* Ajusta à largura da tela */
+            width: 100%;
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col transition-colors duration-300">
-    <header class="bg-indigo-600 text-white py-6">
-        <div class="container mx-auto px-4 flex justify-between items-center">
-            <div>
-                <h1 class="text-3xl font-bold">Serviços de Inteligência Artificial</h1>
-                <p class="mt-2 text-lg">Processamento de textos, imagens e PDFs com IA Gemini</p>
+    <nav class="navbar text-white py-2 shadow-lg">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <i class="fas fa-robot text-2xl"></i>
+                <h1 class="text-xl font-bold">Serviços de IA</h1>
             </div>
-            <div class="theme-toggle" onclick="toggleTheme()">
-                <div class="theme-toggle-slider"></div>
+            <div class="flex items-center gap-4">
+                <a href="#texto" class="hover:text-indigo-200 text-sm"><i class="fas fa-text-width mr-1"></i>Texto</a>
+                <a href="#imagem" class="hover:text-indigo-200 text-sm"><i class="fas fa-image mr-1"></i>Imagem</a>
+                <a href="#pdf" class="hover:text-indigo-200 text-sm"><i class="fas fa-file-pdf mr-1"></i>PDF</a>
+                <a href="#gerar" class="hover:text-indigo-200 text-sm"><i class="fas fa-paint-brush mr-1"></i>Gerar Imagem</a>
             </div>
         </div>
-    </header>
+    </nav>
 
-    <main class="container mx-auto px-4 py-8 flex-grow">
-        <section class="bg-white rounded-lg shadow-md p-6 mb-6 section-container">
-            <h2 class="text-xl font-semibold mb-4 text-gray-800">Processar Texto</h2>
+    <main class="container mx-auto px-4 py-6 flex-grow input-sections">
+        <section id="texto" class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6 section-container">
+            <h2 class="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-200"><i class="fas fa-text-width mr-2"></i>Processar Texto</h2>
             <div class="flex flex-col sm:flex-row gap-4">
-                <input type="text" id="prompt-texto" placeholder="Digite seu prompt (ex.: Explique o que é IA)" class="flex-grow border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                <button id="texto-button" onclick="processarTexto()" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition">Enviar</button>
+                <input type="text" id="prompt-texto" placeholder="Digite seu prompt (ex.: Explique o que é IA)" class="flex-grow border border-gray-300 dark:border-gray-600 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white">
+                <button onclick="processarTexto()" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition">Enviar</button>
             </div>
         </section>
-        <section class="bg-white rounded-lg shadow-md p-6 mb-6 section-container">
-            <h2 class="text-xl font-semibold mb-4 text-gray-800">Processar Imagem</h2>
+        <section id="imagem" class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6 section-container">
+            <h2 class="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-200"><i class="fas fa-image mr-2"></i>Processar Imagem</h2>
             <div class="flex flex-col sm:flex-row gap-4 items-start">
-                <input type="text" id="prompt-imagem" placeholder="Digite o prompt (ex.: Descreva esta imagem)" class="flex-grow border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <input type="text" id="prompt-imagem" placeholder="Digite o prompt (ex.: Descreva esta imagem)" class="flex-grow border border-gray-300 dark:border-gray-600 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white">
                 <div class="file-input-container">
-                    <input type="file" id="file-imagem" accept="image/*" class="custom-file-input">
-                    <label for="file-imagem" class="file-button">Escolher arquivo</label>
+                    <input type="file" id="file-imagem" accept="image/*" multiple class="custom-file-input">
+                    <label for="file-imagem" class="file-button">Escolher arquivos</label>
                 </div>
-                <button id="imagem-button" onclick="processarImagem()" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition">Enviar</button>
+                <button onclick="processarImagem()" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition">Enviar</button>
             </div>
-            <img id="preview-imagem" src="#" alt="Pré-visualização da imagem">
+            <div id="previews-imagem" class="flex flex-wrap gap-4"></div>
         </section>
-        <section class="bg-white rounded-lg shadow-md p-6 mb-6 section-container">
-            <h2 class="text-xl font-semibold mb-4 text-gray-800">Processar PDF</h2>
+        <section id="pdf" class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6 section-container">
+            <h2 class="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-200"><i class="fas fa-file-pdf mr-2"></i>Processar PDF</h2>
             <div class="flex flex-col sm:flex-row gap-4 items-start">
-                <input type="text" id="prompt-pdf" placeholder="Digite o prompt (ex.: Resuma este PDF)" class="flex-grow border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <input type="text" id="prompt-pdf" placeholder="Digite o prompt (ex.: Resuma este PDF)" class="flex-grow border border-gray-300 dark:border-gray-600 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white">
                 <div class="file-input-container">
-                    <input type="file" id="file-pdf" accept=".pdf" class="custom-file-input">
-                    <label for="file-pdf" class="file-button">Escolher arquivo</label>
+                    <input type="file" id="file-pdf" accept=".pdf" multiple class="custom-file-input">
+                    <label for="file-pdf" class="file-button">Escolher arquivos</label>
                 </div>
-                <button id="pdf-button" onclick="processarPdf()" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition">Enviar</button>
+                <button onclick="processarPdf()" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition">Enviar</button>
             </div>
-            <canvas id="preview-pdf"></canvas>
+            <div id="previews-pdf" class="flex flex-wrap gap-4"></div>
         </section>
-        <section class="bg-white rounded-lg shadow-md p-6 section-container">
-            <h2 class="text-xl font-semibold mb-4 text-gray-800">Resultado</h2>
-            <div id="resultado" class="border border-gray-300 rounded-md p-4 bg-gray-50 min-h-[100px]"></div>
-            <div id="loading" class="hidden text-indigo-600 font-medium mt-2">Processando...</div>
-            <div id="erro" class="hidden text-red-600 font-medium mt-2"></div>
+        <section id="gerar" class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6 section-container">
+            <h2 class="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-200"><i class="fas fa-paint-brush mr-2"></i>Gerar Imagem</h2>
+            <div class="flex flex-col sm:flex-row gap-4">
+                <input type="text" id="prompt-gerar-imagem" placeholder="Digite o prompt (ex.: Um gato voando)" class="flex-grow border border-gray-300 dark:border-gray-600 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white">
+                <button onclick="gerarImagem()" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition">Gerar</button>
+            </div>
+            <img id="preview-gerada" src="#" alt="Imagem gerada" class="hidden">
+        </section>
+        <section class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 section-container result-section">
+            <h2 class="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-200"><i class="fas fa-list-alt mr-2"></i>Resultado</h2>
+            <div id="resultado" class="border border-gray-300 dark:border-gray-600 rounded-md p-4 bg-gray-50 dark:bg-gray-700 min-h-[100px]"></div>
+            <div id="uso" class="mt-2 text-gray-600 dark:text-gray-400"></div>
+            <div class="mt-4 flex flex-wrap gap-4">
+                <button onclick="exportarTXT()" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition"><i class="fas fa-file-alt mr-1"></i>Exportar TXT</button>
+                <button onclick="exportarPDF()" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition"><i class="fas fa-file-pdf mr-1"></i>Exportar PDF</button>
+                <button onclick="copiarResultado()" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition"><i class="fas fa-copy mr-1"></i>Copiar Resultado</button>
+                <button onclick="mostrarHistorico()" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition"><i class="fas fa-history mr-1"></i>Ver Histórico</button>
+            </div>
+            <div id="historico"></div>
+            <div id="loading" class="hidden text-indigo-600 dark:text-indigo-400 font-medium mt-2"><i class="fas fa-spinner fa-spin mr-1"></i>Processando...</div>
+            <div id="erro" class="hidden text-red-600 dark:text-red-400 font-medium mt-2"></div>
         </section>
     </main>
 
     <script>
         const API_URL = 'https://api-ia-production.up.railway.app';
+        let history = JSON.parse(localStorage.getItem('ia-history')) || [];
 
-        function previewImagem() {
-            const file = document.getElementById('file-imagem').files[0];
-            const preview = document.getElementById('preview-imagem');
-            if (file) {
-                preview.src = URL.createObjectURL(file);
-                preview.style.display = 'block';
-            } else {
-                preview.src = '#';
-                preview.style.display = 'none';
+        // Modo escuro automático
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.body.classList.add('dark');
+        }
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+            document.body.classList.toggle('dark', e.matches);
+        });
+
+        function previewImagens() {
+            const files = document.getElementById('file-imagem').files;
+            const previews = document.getElementById('previews-imagem');
+            previews.innerHTML = '';
+            for (let file of files) {
+                if (file.size > 5 * 1024 * 1024) {
+                    showError(`A imagem ${file.name} excede o limite de 5MB.`);
+                    document.getElementById('file-imagem').value = '';
+                    return;
+                }
+                const img = document.createElement('img');
+                img.src = URL.createObjectURL(file);
+                previews.appendChild(img);
             }
         }
 
-        async function previewPdf() {
-            const file = document.getElementById('file-pdf').files[0];
-            const canvas = document.getElementById('preview-pdf');
-            if (file) {
+        async function previewPdfs() {
+            const files = document.getElementById('file-pdf').files;
+            const previews = document.getElementById('previews-pdf');
+            previews.innerHTML = '';
+            for (let file of files) {
+                if (file.size > 5 * 1024 * 1024) {
+                    showError(`O PDF ${file.name} excede o limite de 5MB.`);
+                    document.getElementById('file-pdf').value = '';
+                    return;
+                }
+                const canvas = document.createElement('canvas');
                 const url = URL.createObjectURL(file);
                 const pdf = await pdfjsLib.getDocument(url).promise;
                 const page = await pdf.getPage(1);
@@ -235,22 +308,14 @@
                     canvasContext: canvas.getContext('2d'),
                     viewport: viewport
                 }).promise;
-                canvas.style.display = 'block';
-            } else {
-                canvas.style.display = 'none';
+                previews.appendChild(canvas);
             }
-        }
-
-        function toggleTheme() {
-            document.body.classList.toggle('dark');
-            const toggle = document.querySelector('.theme-toggle');
-            toggle.classList.toggle('dark');
         }
 
         async function processarTexto() {
             const prompt = document.getElementById('prompt-texto').value;
-            if (!prompt) {
-                showError('Digite um prompt!');
+            if (!prompt || prompt.length < 10) {
+                showError('Digite um prompt com pelo menos 10 caracteres!');
                 return;
             }
 
@@ -264,6 +329,8 @@
                 const data = await response.json();
                 if (data.status === 'sucesso') {
                     showResult(data.resultado);
+                    saveHistory('texto', prompt, data.resultado);
+                    showUsage(data.usage);
                 } else {
                     showError(data.resultado || 'Erro desconhecido');
                 }
@@ -276,26 +343,36 @@
 
         async function processarImagem() {
             const prompt = document.getElementById('prompt-imagem').value;
-            const file = document.getElementById('file-imagem').files[0];
-            if (!prompt || !file) {
-                showError('Digite um prompt e selecione uma imagem!');
+            const files = document.getElementById('file-imagem').files;
+            if (!prompt || prompt.length < 10 || files.length === 0) {
+                showError('Digite um prompt com pelo menos 10 caracteres e selecione pelo menos uma imagem!');
                 return;
             }
 
             showLoading(true);
+            let results = [];
             try {
-                const base64 = await fileToBase64(file);
-                const response = await fetch(`${API_URL}/processar/imagem`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ prompt, arquivo_base64: base64.split(',')[1] })
-                });
-                const data = await response.json();
-                if (data.status === 'sucesso') {
-                    showResult(data.resultado);
-                } else {
-                    showError(data.resultado || 'Erro desconhecido');
+                for (let file of files) {
+                    if (file.size > 5 * 1024 * 1024) {
+                        showError(`A imagem ${file.name} excede o limite de 5MB.`);
+                        continue;
+                    }
+                    const base64 = await fileToBase64(file);
+                    const response = await fetch(`${API_URL}/processar/imagem`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ prompt, arquivo_base64: base64.split(',')[1] })
+                    });
+                    const data = await response.json();
+                    if (data.status === 'sucesso') {
+                        results.push(data.resultado);
+                        saveHistory('imagem', `${prompt} (arquivo: ${file.name})`, data.resultado);
+                        showUsage(data.usage);
+                    } else {
+                        showError(data.resultado || 'Erro desconhecido');
+                    }
                 }
+                showResult(results.join('\n\n'));
             } catch (error) {
                 showError('Erro: ' + error.message);
             } finally {
@@ -305,23 +382,65 @@
 
         async function processarPdf() {
             const prompt = document.getElementById('prompt-pdf').value;
-            const file = document.getElementById('file-pdf').files[0];
-            if (!prompt || !file) {
-                showError('Digite um prompt e selecione um PDF!');
+            const files = document.getElementById('file-pdf').files;
+            if (!prompt || prompt.length < 10 || files.length === 0) {
+                showError('Digite um prompt com pelo menos 10 caracteres e selecione pelo menos um PDF!');
+                return;
+            }
+
+            showLoading(true);
+            let results = [];
+            try {
+                for (let file of files) {
+                    if (file.size > 5 * 1024 * 1024) {
+                        showError(`O PDF ${file.name} excede o limite de 5MB.`);
+                        continue;
+                    }
+                    const base64 = await fileToBase64(file);
+                    const response = await fetch(`${API_URL}/processar/pdf`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ prompt, arquivo_base64: base64.split(',')[1] })
+                    });
+                    const data = await response.json();
+                    if (data.status === 'sucesso') {
+                        results.push(data.resultado);
+                        saveHistory('pdf', `${prompt} (arquivo: ${file.name})`, data.resultado);
+                        showUsage(data.usage);
+                    } else {
+                        showError(data.resultado || 'Erro desconhecido');
+                    }
+                }
+                showResult(results.join('\n\n'));
+            } catch (error) {
+                showError('Erro: ' + error.message);
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        async function gerarImagem() {
+            const prompt = document.getElementById('prompt-gerar-imagem').value;
+            if (!prompt || prompt.length < 10) {
+                showError('Digite um prompt com pelo menos 10 caracteres!');
                 return;
             }
 
             showLoading(true);
             try {
-                const base64 = await fileToBase64(file);
-                const response = await fetch(`${API_URL}/processar/pdf`, {
+                const response = await fetch(`${API_URL}/processar/gerar-imagem`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ prompt, arquivo_base64: base64.split(',')[1] })
+                    body: JSON.stringify({ prompt })
                 });
                 const data = await response.json();
                 if (data.status === 'sucesso') {
-                    showResult(data.resultado);
+                    const imgSrc = 'data:image/png;base64,' + data.resultado;
+                    document.getElementById('preview-gerada').src = imgSrc;
+                    document.getElementById('preview-gerada').classList.remove('hidden');
+                    showResult('Imagem gerada com sucesso!');
+                    saveHistory('gerar-imagem', prompt, imgSrc);
+                    showUsage(data.usage);
                 } else {
                     showError(data.resultado || 'Erro desconhecido');
                 }
@@ -360,9 +479,72 @@
             loading.classList.toggle('hidden', !isLoading);
         }
 
-        // Adicionar listeners para pré-visualização
-        document.getElementById('file-imagem').addEventListener('change', previewImagem);
-        document.getElementById('file-pdf').addEventListener('change', previewPdf);
+        function showUsage(usage) {
+            if (usage) {
+                document.getElementById('uso').innerText = `Uso: ${usage}`;
+            }
+        }
+
+        function saveHistory(type, prompt, result) {
+            history.push({ type, prompt, result, date: new Date().toISOString() });
+            localStorage.setItem('ia-history', JSON.stringify(history));
+        }
+
+        function mostrarHistorico() {
+            const historicoDiv = document.getElementById('historico');
+            historicoDiv.innerHTML = '<h3 class="text-lg font-semibold mb-2">Histórico de Consultas</h3><ul class="list-disc pl-5">' + 
+                history.map(item => 
+                    `<li><strong>${item.type}</strong>: ${item.prompt} (${new Date(item.date).toLocaleString()})<br>${item.result.substring(0, 100)}...</li>`
+                ).join('') + '</ul>';
+            historicoDiv.style.display = 'block';
+        }
+
+        function exportarTXT() {
+            const text = document.getElementById('resultado').innerText;
+            if (!text) {
+                showError('Nenhum resultado para exportar!');
+                return;
+            }
+            const blob = new Blob([text], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'resultado.txt';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function exportarPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            const text = document.getElementById('resultado').innerText;
+            if (!text) {
+                showError('Nenhum resultado para exportar!');
+                return;
+            }
+            doc.text(text, 10, 10);
+            doc.save('resultado.pdf');
+        }
+
+        function copiarResultado() {
+            const texto = document.getElementById('resultado').innerText;
+            if (!texto) {
+                showError('Nenhum resultado para copiar!');
+                return;
+            }
+            navigator.clipboard.writeText(texto).then(() => {
+                showError('Resultado copiado para a área de transferência!');
+                setTimeout(() => {
+                    document.getElementById('erro').classList.add('hidden');
+                }, 2000);
+            }).catch(err => {
+                showError('Erro ao copiar: ' + err.message);
+            });
+        }
+
+        // Adicionar listeners
+        document.getElementById('file-imagem').addEventListener('change', previewImagens);
+        document.getElementById('file-pdf').addEventListener('change', previewPdfs);
     </script>
 </body>
 </html>

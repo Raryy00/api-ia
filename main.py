@@ -38,6 +38,7 @@ app.add_middleware(
         "http://localhost:8080",
         "http://localhost",
         "https://raryy00.github.io"
+        "http://127.0.0.1:5500"
     ],
     allow_credentials=True,
     allow_methods=["*"],  # Permite todos os métodos, inclusive OPTIONS
