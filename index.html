@@ -433,7 +433,7 @@
                     showResult(`<img src="${imgSrc}" alt="Imagem gerada" style="max-width: 100%; border-radius: 0.5rem;"><p>Imagem gerada com sucesso!</p>`, 'image');
                     saveHistory('gerar-imagem', prompt, imgSrc, 'image');
                 } else {
-                    showError(data.resultado || 'Erro desconhecido');
+                    showError(data.detail || data.resultado || 'Erro desconhecido ao gerar imagem');
                 }
             } catch (error) {
                 showError('Erro: ' + error.message);
