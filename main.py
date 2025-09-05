@@ -5,6 +5,11 @@ from pydantic import BaseModel
 import os
 import base64
 from dotenv import load_dotenv
+import logging
+
+# Configurar logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 load_dotenv()
 
@@ -14,6 +19,7 @@ try:
     from script import processar_texto
     from gerar_imagem import gerar_imagem
 except ImportError as e:
+    logger.error(f"Erro ao importar módulos: {str(e)}")
     raise ImportError(f"Erro ao importar módulos: {str(e)}")
 
 class ProcessarTextoRequest(BaseModel):
@@ -31,7 +37,7 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Restrict to specific origins in production
+    allow_origins=["*"],  # Restrinja a origens específicas em produção
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -48,6 +54,7 @@ async def processar_imagem_route(request: ProcessarArquivoRequest = Body(...)):
         resultado = processar_imagem(request.prompt, image_data)
         return JSONResponse({"status": "sucesso", "prompt": request.prompt, "resultado": resultado})
     except Exception as e:
+        logger.error(f"Erro ao processar imagem: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Erro ao processar imagem: {str(e)}")
 
 @app.post("/processar/pdf")
@@ -57,6 +64,7 @@ async def processar_pdf_route(request: ProcessarArquivoRequest = Body(...)):
         resultado = processar_pdf(request.prompt, pdf_data)
         return JSONResponse({"status": "sucesso", "prompt": request.prompt, "resultado": resultado})
     except Exception as e:
+        logger.error(f"Erro ao processar PDF: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Erro ao processar PDF: {str(e)}")
 
 @app.post("/processar/texto")
@@ -65,14 +73,19 @@ async def processar_texto_route(request: ProcessarTextoRequest = Body(...)):
         resultado = processar_texto(request.prompt)
         return JSONResponse({"status": "sucesso", "prompt": request.prompt, "resultado": resultado})
     except Exception as e:
+        logger.error(f"Erro ao processar texto: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Erro ao processar texto: {str(e)}")
 
 @app.post("/gerar/imagem")
 async def gerar_imagem_route(request: ProcessarTextoRequest = Body(...)):
     try:
         resultado = gerar_imagem(request.prompt)
+        if resultado.startswith("Erro"):
+            logger.error(f"Erro retornado por gerar_imagem: {resultado}")
+            raise HTTPException(status_code=500, detail=resultado)
         return JSONResponse({"status": "sucesso", "prompt": request.prompt, "resultado": resultado})
     except Exception as e:
+        logger.error(f"Erro na rota /gerar/imagem: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Erro ao gerar imagem: {str(e)}")
 
 @app.get("/saude")

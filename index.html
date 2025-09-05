@@ -455,7 +455,7 @@
             const resultado = document.getElementById('resultado');
             const erro = document.getElementById('erro');
             if (type === 'image') {
-                resultado.innerHTML = content; // Already includes <img> and text
+                resultado.innerHTML = content;
             } else {
                 resultado.innerHTML = marked.parse(content);
             }
@@ -486,7 +486,7 @@
             history.forEach((item, index) => {
                 const btn = document.createElement('button');
                 btn.className = 'history-item';
-                btn.textContent = `${item.type}: ${item.prompt.substring(0, 50) + (item.prompt.length > 50 ? '...' : '')} (${new Date(item.date).toLocaleString()})`;
+                btn.textContent = `${item.type.toUpperCase()}: ${item.prompt.substring(0, 50) + (item.prompt.length > 50 ? '...' : '')} (${new Date(item.date).toLocaleString()})`;
                 btn.addEventListener('click', () => {
                     showResult(item.result, item.resultType);
                     historicoModal.style.display = 'none';
@@ -529,7 +529,6 @@
                 showError('Nenhum resultado para copiar!');
                 return;
             }
-            // Try Clipboard API
             if (navigator.clipboard && navigator.permissions) {
                 navigator.clipboard.writeText(texto).then(() => {
                     showError('Resultado copiado para a área de transferência!');
@@ -537,11 +536,9 @@
                         document.getElementById('erro').classList.add('hidden');
                     }, 2000);
                 }).catch(err => {
-                    // Fallback for Clipboard API failure
                     fallbackCopyText(texto);
                 });
             } else {
-                // Fallback for environments without Clipboard API
                 fallbackCopyText(texto);
             }
         }
