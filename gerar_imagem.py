@@ -17,9 +17,9 @@ def gerar_imagem(prompt: str) -> str:
             logger.error("Chave de API OPENAI_API_KEY não configurada.")
             return "Erro: Chave de API OPENAI_API_KEY não configurada."
 
-        # Inicializar o cliente OpenAI com proxies=None
+        # Inicializar o cliente OpenAI
         logger.info("Inicializando cliente OpenAI...")
-        client = OpenAI(api_key=api_key, proxies=None)  # Adicionado proxies=None
+        client = OpenAI(api_key=api_key)
 
         # Gerar imagem
         logger.info(f"Gerando imagem com prompt: {prompt}")
