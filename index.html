@@ -16,20 +16,11 @@
             color: #1f2937;
             transition: all 0.3s ease;
             font-family: 'Inter', sans-serif;
-            overflow-x: hidden; /* Evita barra de rolagem horizontal */
+            overflow-x: hidden;
         }
         body.dark {
             background-color: #111827;
             color: #f9fafb;
-        }
-        /* Navbar */
-        .navbar {
-            background: linear-gradient(to right, #4f46e5, #6366f1);
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            padding: 1rem 0; /* Reduzido para navbar mais fina */
-        }
-        body.dark .navbar {
-            background: linear-gradient(to right, #1e3a8a, #312e81);
         }
         /* Scrollbar vertical */
         ::-webkit-scrollbar {
@@ -147,40 +138,9 @@
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        /* Responsive */
-        @media (min-width: 768px) {
-            .input-sections {
-                display: grid;
-                grid-template-columns: repeat(3, 1fr);
-                gap: 1.5rem;
-            }
-            .result-section {
-                grid-column: span 3;
-            }
-        }
-        @media (max-width: 767px) {
-            .flex-col {
-                flex-direction: column;
-            }
-            button {
-                width: 100%;
-            }
-            .navbar .flex {
-                flex-direction: column;
-                gap: 1rem;
-            }
-        }
-        #historico {
-            display: none;
-            margin-top: 1rem;
-            border: 1px solid #e5e7eb;
-            padding: 1rem;
-            background: #f9fafb;
-            border-radius: 0.5rem;
-        }
         /* Container */
         .container {
-            max-width: 100%; /* Ajusta à largura da tela */
+            max-width: 100%;
             width: 100%;
             padding-left: 1rem;
             padding-right: 1rem;
@@ -188,22 +148,11 @@
     </style>
 </head>
 <body class="min-h-screen flex flex-col transition-colors duration-300">
-    <nav class="navbar text-white py-2 shadow-lg">
-        <div class="container mx-auto flex justify-between items-center">
-            <div class="flex items-center gap-3">
-                <i class="fas fa-robot text-2xl"></i>
-                <h1 class="text-xl font-bold">Serviços de IA</h1>
-            </div>
-            <div class="flex items-center gap-4">
-                <a href="#texto" class="hover:text-indigo-200 text-sm"><i class="fas fa-text-width mr-1"></i>Texto</a>
-                <a href="#imagem" class="hover:text-indigo-200 text-sm"><i class="fas fa-image mr-1"></i>Imagem</a>
-                <a href="#pdf" class="hover:text-indigo-200 text-sm"><i class="fas fa-file-pdf mr-1"></i>PDF</a>
-                <a href="#gerar" class="hover:text-indigo-200 text-sm"><i class="fas fa-paint-brush mr-1"></i>Gerar Imagem</a>
-            </div>
+    <main class="container mx-auto px-4 py-6 flex-grow">
+        <div class="flex items-center gap-3 mb-6">
+            <i class="fas fa-robot text-2xl text-indigo-600"></i>
+            <h1 class="text-xl font-bold text-gray-800 dark:text-gray-200">Serviços de IA</h1>
         </div>
-    </nav>
-
-    <main class="container mx-auto px-4 py-6 flex-grow input-sections">
         <section id="texto" class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6 section-container">
             <h2 class="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-200"><i class="fas fa-text-width mr-2"></i>Processar Texto</h2>
             <div class="flex flex-col sm:flex-row gap-4">
@@ -243,7 +192,7 @@
             </div>
             <img id="preview-gerada" src="#" alt="Imagem gerada" class="hidden">
         </section>
-        <section class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 section-container result-section">
+        <section class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 section-container">
             <h2 class="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-200"><i class="fas fa-list-alt mr-2"></i>Resultado</h2>
             <div id="resultado" class="border border-gray-300 dark:border-gray-600 rounded-md p-4 bg-gray-50 dark:bg-gray-700 min-h-[100px]"></div>
             <div id="uso" class="mt-2 text-gray-600 dark:text-gray-400"></div>
