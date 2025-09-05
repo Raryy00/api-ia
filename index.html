@@ -21,7 +21,6 @@
             background-color: #111827;
             color: #f9fafb;
         }
-        /* Scrollbar vertical */
         ::-webkit-scrollbar {
             width: 8px;
         }
@@ -39,7 +38,6 @@
         body.dark ::-webkit-scrollbar-thumb {
             background: #6b7280;
         }
-        /* Resultado */
         #resultado { 
             white-space: pre-wrap; 
             line-height: 1.6;
@@ -55,7 +53,6 @@
         #resultado li {
             margin-bottom: 0.5rem;
         }
-        /* File input */
         .custom-file-input {
             width: 0.1px;
             height: 0.1px;
@@ -81,10 +78,9 @@
             align-items: center;
             gap: 1rem;
         }
-        /* Previews */
         #previews-imagem img, #preview-gerada {
-            max-width: 200px;
-            max-height: 200px;
+            max-width: 300px;
+            max-height: 300px;
             object-fit: contain;
             border: 2px solid #e5e7eb;
             border-radius: 0.5rem;
@@ -101,7 +97,6 @@
             margin-top: 1rem;
             margin-right: 1rem;
         }
-        /* Dark mode */
         body.dark .bg-white {
             background-color: #1f2937;
         }
@@ -125,11 +120,9 @@
         body.dark input[type="text"]:focus {
             border-color: #4f46e5;
         }
-        body.dark #historico {
-            background: #374151;
-            border-color: #6b7280;
+        body.dark #historico-modal {
+            background: rgba(55, 65, 81, 0.95);
         }
-        /* Animations */
         .section-container {
             animation: fadeIn 0.5s ease-in-out;
         }
@@ -137,12 +130,62 @@
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        /* Container */
         .container {
             max-width: 100%;
             width: 100%;
             padding-left: 1rem;
             padding-right: 1rem;
+        }
+        #historico-modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            border-radius: 10px;
+            width: 400px;
+            max-height: 400px;
+            overflow-y: auto;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+        #historico-modal button.history-item {
+            display: block;
+            width: 100%;
+            margin-bottom: 10px;
+            padding: 10px;
+            background: #f0f0f0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            text-align: left;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        body.dark #historico-modal button.history-item {
+            background: #4b5563;
+            border-color: #6b7280;
+            color: #f9fafb;
+        }
+        #historico-modal button.history-item:hover {
+            background: #e0e0e0;
+        }
+        body.dark #historico-modal button.history-item:hover {
+            background: #6b7280;
+        }
+        #close-modal {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #1f2937;
+        }
+        body.dark #close-modal {
+            color: #f9fafb;
         }
     </style>
 </head>
@@ -201,7 +244,11 @@
                 <button onclick="copiarResultado()" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition"><i class="fas fa-copy mr-1"></i>Copiar Resultado</button>
                 <button onclick="mostrarHistorico()" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition"><i class="fas fa-history mr-1"></i>Ver Histórico</button>
             </div>
-            <div id="historico"></div>
+            <div id="historico-modal">
+                <button id="close-modal">X</button>
+                <h3 class="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-200">Histórico de Consultas</h3>
+                <div id="historico-lista"></div>
+            </div>
             <div id="loading" class="hidden text-indigo-600 dark:text-indigo-400 font-medium mt-2"><i class="fas fa-spinner fa-spin mr-1"></i>Processando...</div>
             <div id="erro" class="hidden text-red-600 dark:text-red-400 font-medium mt-2"></div>
         </section>
@@ -373,7 +420,7 @@
 
             showLoading(true);
             try {
-                const response = await fetch(`${API_URL}/gerar/imagem`, {  // Corrigido para /gerar/imagem
+                const response = await fetch(`${API_URL}/gerar/imagem`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ prompt })
@@ -383,8 +430,8 @@
                     const imgSrc = 'data:image/png;base64,' + data.resultado;
                     document.getElementById('preview-gerada').src = imgSrc;
                     document.getElementById('preview-gerada').classList.remove('hidden');
-                    showResult('Imagem gerada com sucesso!');
-                    saveHistory('gerar-imagem', prompt, imgSrc);
+                    showResult(`<img src="${imgSrc}" alt="Imagem gerada" style="max-width: 100%; border-radius: 0.5rem;"><p>Imagem gerada com sucesso!</p>`, 'image');
+                    saveHistory('gerar-imagem', prompt, imgSrc, 'image');
                 } else {
                     showError(data.resultado || 'Erro desconhecido');
                 }
@@ -404,10 +451,14 @@
             });
         }
 
-        function showResult(text) {
+        function showResult(content, type = 'text') {
             const resultado = document.getElementById('resultado');
             const erro = document.getElementById('erro');
-            resultado.innerHTML = marked.parse(text);
+            if (type === 'image') {
+                resultado.innerHTML = content; // Already includes <img> and text
+            } else {
+                resultado.innerHTML = marked.parse(content);
+            }
             erro.classList.add('hidden');
         }
 
@@ -423,18 +474,26 @@
             loading.classList.toggle('hidden', !isLoading);
         }
 
-        function saveHistory(type, prompt, result) {
-            history.push({ type, prompt, result, date: new Date().toISOString() });
+        function saveHistory(type, prompt, result, resultType = 'text') {
+            history.push({ type, prompt, result, resultType, date: new Date().toISOString() });
             localStorage.setItem('ia-history', JSON.stringify(history));
         }
 
         function mostrarHistorico() {
-            const historicoDiv = document.getElementById('historico');
-            historicoDiv.innerHTML = '<h3 class="text-lg font-semibold mb-2">Histórico de Consultas</h3><ul class="list-disc pl-5">' + 
-                history.map(item => 
-                    `<li><strong>${item.type}</strong>: ${item.prompt} (${new Date(item.date).toLocaleString()})<br>${item.result.substring(0, 100)}...</li>`
-                ).join('') + '</ul>';
-            historicoDiv.style.display = 'block';
+            const historicoModal = document.getElementById('historico-modal');
+            const historicoLista = document.getElementById('historico-lista');
+            historicoLista.innerHTML = '';
+            history.forEach((item, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'history-item';
+                btn.textContent = `${item.type}: ${item.prompt.substring(0, 50) + (item.prompt.length > 50 ? '...' : '')} (${new Date(item.date).toLocaleString()})`;
+                btn.addEventListener('click', () => {
+                    showResult(item.result, item.resultType);
+                    historicoModal.style.display = 'none';
+                });
+                historicoLista.appendChild(btn);
+            });
+            historicoModal.style.display = 'block';
         }
 
         function exportarTXT() {
@@ -470,19 +529,46 @@
                 showError('Nenhum resultado para copiar!');
                 return;
             }
-            navigator.clipboard.writeText(texto).then(() => {
+            // Try Clipboard API
+            if (navigator.clipboard && navigator.permissions) {
+                navigator.clipboard.writeText(texto).then(() => {
+                    showError('Resultado copiado para a área de transferência!');
+                    setTimeout(() => {
+                        document.getElementById('erro').classList.add('hidden');
+                    }, 2000);
+                }).catch(err => {
+                    // Fallback for Clipboard API failure
+                    fallbackCopyText(texto);
+                });
+            } else {
+                // Fallback for environments without Clipboard API
+                fallbackCopyText(texto);
+            }
+        }
+
+        function fallbackCopyText(text) {
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            document.body.appendChild(textArea);
+            textArea.select();
+            try {
+                document.execCommand('copy');
                 showError('Resultado copiado para a área de transferência!');
                 setTimeout(() => {
                     document.getElementById('erro').classList.add('hidden');
                 }, 2000);
-            }).catch(err => {
+            } catch (err) {
                 showError('Erro ao copiar: ' + err.message);
-            });
+            }
+            document.body.removeChild(textArea);
         }
 
         // Adicionar listeners
         document.getElementById('file-imagem').addEventListener('change', previewImagens);
         document.getElementById('file-pdf').addEventListener('change', previewPdfs);
+        document.getElementById('close-modal').addEventListener('click', () => {
+            document.getElementById('historico-modal').style.display = 'none';
+        });
     </script>
 </body>
 </html>
