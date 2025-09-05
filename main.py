@@ -1,3 +1,4 @@
+# main.py (atualizado com novo endpoint)
 from fastapi import FastAPI, HTTPException, Body
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -14,6 +15,7 @@ try:
     from imagem import processar_imagem
     from pdf import processar_pdf
     from script import processar_texto
+    from gerar_imagem import gerar_imagem
 except ImportError as e:
     raise ImportError(f"Erro ao importar módulos: {str(e)}")
 
@@ -31,18 +33,18 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Adicionar middleware CORS - ATUALIZADO para GitHub Pages
+# Adicionar middleware CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:8080",
         "http://localhost",
-        "https://raryy00.github.io"
+        "https://raryy00.github.io",
         "http://127.0.0.1:5500"
     ],
     allow_credentials=True,
-    allow_methods=["*"],  # Permite todos os métodos, inclusive OPTIONS
-    allow_headers=["*"],  # Permite todos os headers
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 @app.get("/")
@@ -120,6 +122,26 @@ async def processar_texto_route(request: ProcessarTextoRequest = Body(...)):
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erro ao processar texto: {str(e)}")
+
+@app.post("/gerar/imagem")
+async def gerar_imagem_route(request: ProcessarTextoRequest = Body(...)):
+    """
+    Gera uma imagem com base no prompt fornecido
+    """
+    try:
+        # Gera a imagem
+        resultado = gerar_imagem(request.prompt)
+        
+        return JSONResponse(
+            content={
+                "status": "sucesso",
+                "prompt": request.prompt,
+                "resultado": resultado
+            }
+        )
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro ao gerar imagem: {str(e)}")
 
 @app.get("/saude")
 async def health_check():

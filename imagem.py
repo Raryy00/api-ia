@@ -1,3 +1,4 @@
+# imagem.py
 import google.generativeai as genai
 from PIL import Image
 from io import BytesIO
@@ -16,11 +17,11 @@ except Exception as e:
 
 model = None
 
-def processar_imagem(prompt: str, image_data: bytes) -> tuple:
+def processar_imagem(prompt: str, image_data: bytes) -> str:
     global model
     try:
         if not os.getenv('GEMINI_API_KEY'):
-            return "Erro: Chave de API GEMINI_API_KEY não configurada.", ""
+            return "Erro: Chave de API GEMINI_API_KEY não configurada."
         
         if not model:
             api_key = os.getenv('GEMINI_API_KEY')
@@ -44,12 +45,7 @@ def processar_imagem(prompt: str, image_data: bytes) -> tuple:
         response = model.generate_content(contents)
         resultado = response.text if hasattr(response, 'text') else "Nenhuma resposta válida."
         
-        usage = ""
-        if hasattr(response, 'usage_metadata'):
-            um = response.usage_metadata
-            usage = f"Prompt tokens: {um.prompt_token_count}, Total tokens: {um.total_token_count}"
-        
-        return resultado, usage
+        return resultado
     
     except Exception as e:
-        return f"Erro ao processar imagem: {str(e)}", ""
+        return f"Erro ao processar imagem: {str(e)}"

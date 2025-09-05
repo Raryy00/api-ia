@@ -1,3 +1,4 @@
+# script.py
 import google.generativeai as genai
 import os
 from dotenv import load_dotenv
@@ -13,11 +14,11 @@ except Exception as e:
 
 model = None
 
-def processar_texto(prompt: str) -> tuple:
+def processar_texto(prompt: str) -> str:
     global model
     try:
         if not os.getenv('GEMINI_API_KEY'):
-            return "Erro: Chave de API GEMINI_API_KEY não configurada.", ""
+            return "Erro: Chave de API GEMINI_API_KEY não configurada."
         
         if not model:
             api_key = os.getenv('GEMINI_API_KEY')
@@ -27,12 +28,7 @@ def processar_texto(prompt: str) -> tuple:
         response = model.generate_content(prompt)
         resultado = response.text if hasattr(response, 'text') else "Nenhuma resposta válida."
         
-        usage = ""
-        if hasattr(response, 'usage_metadata'):
-            um = response.usage_metadata
-            usage = f"Prompt tokens: {um.prompt_token_count}, Total tokens: {um.total_token_count}"
-        
-        return resultado, usage
+        return resultado
     
     except Exception as e:
-        return f"Erro ao processar texto: {str(e)}", ""
+        return f"Erro ao processar texto: {str(e)}"

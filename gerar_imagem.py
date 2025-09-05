@@ -1,38 +1,32 @@
-import google.generativeai as genai
+# gerar_imagem.py
+import openai
 import os
 from dotenv import load_dotenv
+import base64
 
 load_dotenv()
 
 try:
-    api_key = os.getenv('GEMINI_API_KEY')
+    api_key = os.getenv('OPENAI_API_KEY')
     if api_key:
-        genai.configure(api_key=api_key)
+        openai.api_key = api_key
 except Exception as e:
     print(f"Aviso: Erro ao configurar a API no import: {e}")
 
-model = None
-
-def gerar_imagem(prompt: str) -> tuple:
-    global model
+def gerar_imagem(prompt: str) -> str:
     try:
-        if not os.getenv('GEMINI_API_KEY'):
-            return "Erro: Chave de API GEMINI_API_KEY não configurada.", ""
+        if not os.getenv('OPENAI_API_KEY'):
+            return "Erro: Chave de API OPENAI_API_KEY não configurada."
         
-        if not model:
-            api_key = os.getenv('GEMINI_API_KEY')
-            genai.configure(api_key=api_key)
-            model = genai.GenerativeModel('gemini-1.5-flash')  # Ajuste para model de image gen se disponível; aqui assume text-to-image via prompt
+        response = openai.Image.create(
+            prompt=prompt,
+            n=1,
+            size="512x512",
+            response_format="b64_json"
+        )
         
-        response = model.generate_content(prompt)
-        resultado = response.text if hasattr(response, 'text') else "Nenhuma imagem gerada."  # Note: Para true image gen, ajuste para extrair base64
-        
-        usage = ""
-        if hasattr(response, 'usage_metadata'):
-            um = response.usage_metadata
-            usage = f"Prompt tokens: {um.prompt_token_count}, Total tokens: {um.total_token_count}"
-        
-        return resultado, usage  # Para true gen, retorne base64 da imagem
+        image_b64 = response['data'][0]['b64_json']
+        return image_b64
     
     except Exception as e:
-        return f"Erro ao gerar imagem: {str(e)}", ""
+        return f"Erro ao gerar imagem: {str(e)}"
