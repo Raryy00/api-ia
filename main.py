@@ -37,12 +37,12 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:8080",
         "http://localhost",
-        "https://raryy00.github.io"
+        "https://raryy00.github.io",
         "http://127.0.0.1:5500"
     ],
     allow_credentials=True,
-    allow_methods=["*"],  # Permite todos os métodos, inclusive OPTIONS
-    allow_headers=["*"],  # Permite todos os headers
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 @app.get("/")
