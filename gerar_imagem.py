@@ -1,8 +1,6 @@
-# gerar_imagem.py
 import openai
 import os
 from dotenv import load_dotenv
-import base64
 
 load_dotenv()
 
@@ -18,14 +16,15 @@ def gerar_imagem(prompt: str) -> str:
         if not os.getenv('OPENAI_API_KEY'):
             return "Erro: Chave de API OPENAI_API_KEY não configurada."
         
-        response = openai.Image.create(
+        response = openai.images.generate(
+            model="dall-e-3",
             prompt=prompt,
             n=1,
-            size="512x512",
+            size="1024x1024",
             response_format="b64_json"
         )
         
-        image_b64 = response['data'][0]['b64_json']
+        image_b64 = response.data[0].b64_json
         return image_b64
     
     except Exception as e:

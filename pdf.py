@@ -1,8 +1,6 @@
-# pdf.py
 import google.generativeai as genai
 import os
 from dotenv import load_dotenv
-import base64
 
 load_dotenv()
 
@@ -15,7 +13,7 @@ except Exception as e:
 
 model = None
 
-def processar_pdf(prompt: str, pdf_data: bytes) -> str:
+def processar_texto(prompt: str) -> str:
     global model
     try:
         if not os.getenv('GEMINI_API_KEY'):
@@ -26,21 +24,10 @@ def processar_pdf(prompt: str, pdf_data: bytes) -> str:
             genai.configure(api_key=api_key)
             model = genai.GenerativeModel('gemini-1.5-flash')
         
-        pdf_base64 = base64.b64encode(pdf_data).decode('utf-8')
-        
-        contents = [
-            {
-                "parts": [
-                    {"inline_data": {"mime_type": "application/pdf", "data": pdf_base64}},
-                    {"text": prompt}
-                ]
-            }
-        ]
-        
-        response = model.generate_content(contents)
+        response = model.generate_content(prompt)
         resultado = response.text if hasattr(response, 'text') else "Nenhuma resposta válida."
         
         return resultado
     
     except Exception as e:
-        return f"Erro ao processar PDF: {str(e)}"
+        return f"Erro ao processar texto: {str(e)}"

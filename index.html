@@ -10,7 +10,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* Estilos gerais */
         body {
             background-color: #f3f4f6;
             color: #1f2937;
@@ -279,7 +278,6 @@
                 if (data.status === 'sucesso') {
                     showResult(data.resultado);
                     saveHistory('texto', prompt, data.resultado);
-                    showUsage(data.usage);
                 } else {
                     showError(data.resultado || 'Erro desconhecido');
                 }
@@ -316,7 +314,6 @@
                     if (data.status === 'sucesso') {
                         results.push(data.resultado);
                         saveHistory('imagem', `${prompt} (arquivo: ${file.name})`, data.resultado);
-                        showUsage(data.usage);
                     } else {
                         showError(data.resultado || 'Erro desconhecido');
                     }
@@ -355,7 +352,6 @@
                     if (data.status === 'sucesso') {
                         results.push(data.resultado);
                         saveHistory('pdf', `${prompt} (arquivo: ${file.name})`, data.resultado);
-                        showUsage(data.usage);
                     } else {
                         showError(data.resultado || 'Erro desconhecido');
                     }
@@ -377,7 +373,7 @@
 
             showLoading(true);
             try {
-                const response = await fetch(`${API_URL}/processar/gerar-imagem`, {
+                const response = await fetch(`${API_URL}/gerar/imagem`, {  // Corrigido para /gerar/imagem
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ prompt })
@@ -389,7 +385,6 @@
                     document.getElementById('preview-gerada').classList.remove('hidden');
                     showResult('Imagem gerada com sucesso!');
                     saveHistory('gerar-imagem', prompt, imgSrc);
-                    showUsage(data.usage);
                 } else {
                     showError(data.resultado || 'Erro desconhecido');
                 }
@@ -426,12 +421,6 @@
         function showLoading(isLoading) {
             const loading = document.getElementById('loading');
             loading.classList.toggle('hidden', !isLoading);
-        }
-
-        function showUsage(usage) {
-            if (usage) {
-                document.getElementById('uso').innerText = `Uso: ${usage}`;
-            }
         }
 
         function saveHistory(type, prompt, result) {
