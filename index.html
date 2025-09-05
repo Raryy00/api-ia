@@ -145,14 +145,16 @@
             background: rgba(255, 255, 255, 0.95);
             padding: 20px;
             border-radius: 10px;
-            width: 400px;
-            max-height: 400px;
+            width: 500px; /* Aumentado de 400px para 500px */
+            max-height: 500px; /* Aumentado de 400px para 500px */
             overflow-y: auto;
             box-shadow: 0 0 10px rgba(0,0,0,0.5);
             z-index: 1000;
         }
         #historico-modal button.history-item {
-            display: block;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             width: 100%;
             margin-bottom: 10px;
             padding: 10px;
@@ -162,6 +164,19 @@
             text-align: left;
             cursor: pointer;
             transition: background-color 0.3s;
+            position: relative;
+        }
+        #historico-modal button.history-item .delete-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: #ef4444;
+            cursor: pointer;
+            font-size: 16px;
+            padding: 0 8px;
+        }
+        #historico-modal button.history-item:hover .delete-btn {
+            display: inline;
         }
         body.dark #historico-modal button.history-item {
             background: #4b5563;
@@ -186,6 +201,25 @@
         }
         body.dark #close-modal {
             color: #f9fafb;
+        }
+        #clear-history-btn {
+            background: #ef4444;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 10px;
+        }
+        #clear-history-btn:hover {
+            background: #dc2626;
+        }
+        body.dark #clear-history-btn {
+            background: #b91c1c;
+        }
+        body.dark #clear-history-btn:hover {
+            background: #991b1b;
         }
     </style>
 </head>
@@ -248,6 +282,7 @@
                 <button id="close-modal">X</button>
                 <h3 class="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-200">Histórico de Consultas</h3>
                 <div id="historico-lista"></div>
+                <button id="clear-history-btn">Excluir Tudo</button>
             </div>
             <div id="loading" class="hidden text-indigo-600 dark:text-indigo-400 font-medium mt-2"><i class="fas fa-spinner fa-spin mr-1"></i>Processando...</div>
             <div id="erro" class="hidden text-red-600 dark:text-red-400 font-medium mt-2"></div>
@@ -326,7 +361,7 @@
                     showResult(data.resultado);
                     saveHistory('texto', prompt, data.resultado);
                 } else {
-                    showError(data.resultado || 'Erro desconhecido');
+                    showError(data.detail || data.resultado || 'Erro desconhecido ao processar texto');
                 }
             } catch (error) {
                 showError('Erro: ' + error.message);
@@ -362,7 +397,7 @@
                         results.push(data.resultado);
                         saveHistory('imagem', `${prompt} (arquivo: ${file.name})`, data.resultado);
                     } else {
-                        showError(data.resultado || 'Erro desconhecido');
+                        showError(data.detail || data.resultado || 'Erro desconhecido ao processar imagem');
                     }
                 }
                 showResult(results.join('\n\n'));
@@ -400,7 +435,7 @@
                         results.push(data.resultado);
                         saveHistory('pdf', `${prompt} (arquivo: ${file.name})`, data.resultado);
                     } else {
-                        showError(data.resultado || 'Erro desconhecido');
+                        showError(data.detail || data.resultado || 'Erro desconhecido ao processar PDF');
                     }
                 }
                 showResult(results.join('\n\n'));
@@ -479,6 +514,20 @@
             localStorage.setItem('ia-history', JSON.stringify(history));
         }
 
+        function deleteHistoryItem(index) {
+            history.splice(index, 1);
+            localStorage.setItem('ia-history', JSON.stringify(history));
+            mostrarHistorico();
+        }
+
+        function clearHistory() {
+            if (confirm('Tem certeza que deseja excluir todo o histórico?')) {
+                history = [];
+                localStorage.setItem('ia-history', JSON.stringify(history));
+                mostrarHistorico();
+            }
+        }
+
         function mostrarHistorico() {
             const historicoModal = document.getElementById('historico-modal');
             const historicoLista = document.getElementById('historico-lista');
@@ -486,7 +535,14 @@
             history.forEach((item, index) => {
                 const btn = document.createElement('button');
                 btn.className = 'history-item';
-                btn.textContent = `${item.type.toUpperCase()}: ${item.prompt.substring(0, 50) + (item.prompt.length > 50 ? '...' : '')} (${new Date(item.date).toLocaleString()})`;
+                btn.innerHTML = `
+                    <span>${item.type.toUpperCase()}: ${item.prompt.substring(0, 50) + (item.prompt.length > 50 ? '...' : '')} (${new Date(item.date).toLocaleString()})</span>
+                    <button class="delete-btn"><i class="fas fa-trash-alt"></i></button>
+                `;
+                btn.querySelector('.delete-btn').addEventListener('click', (e) => {
+                    e.stopPropagation(); // Evita abrir o resultado ao clicar na lixeirinha
+                    deleteHistoryItem(index);
+                });
                 btn.addEventListener('click', () => {
                     showResult(item.result, item.resultType);
                     historicoModal.style.display = 'none';
@@ -495,6 +551,8 @@
             });
             historicoModal.style.display = 'block';
         }
+
+        document.getElementById('clear-history-btn').addEventListener('click', clearHistory);
 
         function exportarTXT() {
             const text = document.getElementById('resultado').innerText;

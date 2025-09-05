@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 from openai import OpenAI
 import logging
 
-# Configurar logging
+# Configurar logging para depuração
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -17,7 +17,7 @@ def gerar_imagem(prompt: str) -> str:
             logger.error("Chave de API OPENAI_API_KEY não configurada.")
             return "Erro: Chave de API OPENAI_API_KEY não configurada."
 
-        # Inicializar o cliente OpenAI
+        # Inicializar o cliente OpenAI explicitamente, sem argumentos adicionais
         logger.info("Inicializando cliente OpenAI...")
         client = OpenAI(api_key=api_key)
 
@@ -37,5 +37,5 @@ def gerar_imagem(prompt: str) -> str:
         return image_b64
 
     except Exception as e:
-        logger.error(f"Erro ao gerar imagem: {str(e)}")
+        logger.error(f"Erro detalhado ao gerar imagem: {str(e)}")
         return f"Erro ao gerar imagem: {str(e)}"
