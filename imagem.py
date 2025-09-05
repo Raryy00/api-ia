@@ -27,7 +27,14 @@ def processar_imagem(prompt: str, image_data: bytes) -> tuple:
             genai.configure(api_key=api_key)
             model = genai.GenerativeModel('gemini-1.5-flash')
         
+        # Carregar a imagem
         image = Image.open(BytesIO(image_data))
+        
+        # Converter a imagem para o modo RGB se necessário
+        if image.mode in ('P', 'RGBA'):
+            image = image.convert('RGB')
+        
+        # Salvar a imagem como JPEG
         buffered = BytesIO()
         image.save(buffered, format="JPEG")
         img_base64 = base64.b64encode(buffered.getvalue()).decode('utf-8')
