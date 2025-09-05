@@ -28,7 +28,14 @@ def processar_imagem(prompt: str, image_data: bytes) -> str:
             genai.configure(api_key=api_key)
             model = genai.GenerativeModel('gemini-1.5-flash')
         
+        # Carregar a imagem
         image = Image.open(BytesIO(image_data))
+        
+        # Converter a imagem para o modo RGB se necessário
+        if image.mode in ('P', 'RGBA'):
+            image = image.convert('RGB')
+        
+        # Salvar a imagem como JPEG
         buffered = BytesIO()
         image.save(buffered, format="JPEG")
         img_base64 = base64.b64encode(buffered.getvalue()).decode('utf-8')
@@ -48,4 +55,8 @@ def processar_imagem(prompt: str, image_data: bytes) -> str:
         return resultado
     
     except Exception as e:
+<<<<<<< HEAD
         return f"Erro ao processar imagem: {str(e)}"
+=======
+        return f"Erro ao processar imagem: {str(e)}", ""
+>>>>>>> e045dea5c96f3a4a055d97ee735bf17d1a94ec4c
